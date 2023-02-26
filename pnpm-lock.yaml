@@ -8,6 +8,7 @@ specifiers:
   '@testing-library/react': ^13.4.0
   '@testing-library/user-event': ^13.5.0
   '@types/gapi': ^0.0.44
+  '@types/gapi.client.sheets': ^4.0.20201031
   '@types/google.accounts': ^0.0.6
   '@types/jest': ^27.5.2
   '@types/node': ^16.18.12
@@ -41,6 +42,7 @@ dependencies:
 
 devDependencies:
   '@types/gapi': 0.0.44
+  '@types/gapi.client.sheets': 4.0.20201031
   '@types/google.accounts': 0.0.6
   '@types/testing-library__jest-dom': 5.14.5
 
@@ -2043,6 +2045,20 @@ packages:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
     dev: false
 
+  /@maxim_mazurok/gapi.client.discovery-v1/0.0.20200806:
+    resolution: {integrity: sha512-0pZtrElj8bc0YROIo7nH8VVvks/iww/L68l7r74oC9+ksSVO3Lum1zUR8dXTvJ7TqLGaNYiiNaUZianK6doh/w==}
+    dependencies:
+      '@types/gapi.client': 1.0.5
+      '@types/gapi.client.discovery': 1.0.9
+    dev: true
+
+  /@maxim_mazurok/gapi.client.sheets-v4/0.0.20230221:
+    resolution: {integrity: sha512-nrAfK8SJgS2YG6uZMNAL4KjibZst+NfRJc0ovtIbhA4aLLSPpK5/nWaIOPiHvEzzuNGAk/wiUfKKXjfABOgCaw==}
+    dependencies:
+      '@types/gapi.client': 1.0.5
+      '@types/gapi.client.discovery': 1.0.9
+    dev: true
+
   /@mui/base/5.0.0-alpha.118_zula6vjvt3wdocc4mwcxqa6nzi:
     resolution: {integrity: sha512-GAEpqhnuHjRaAZLdxFNuOf2GDTp9sUawM46oHZV4VnYPFjXJDkIYFWfIQLONb0nga92OiqS5DD/scGzVKCL0Mw==}
     engines: {node: '>=12.0.0'}
@@ -2632,6 +2648,22 @@ packages:
       '@types/qs': 6.9.7
       '@types/serve-static': 1.15.0
     dev: false
+
+  /@types/gapi.client.discovery/1.0.9:
+    resolution: {integrity: sha512-51fXpt7DM7+zPG5pgwnNr3KaRXmyszznu66VPpV7+FAu0LGtpTohvdfvkRCnCn2Z6EgNTq/baFAtCa/9ylHOug==}
+    dependencies:
+      '@maxim_mazurok/gapi.client.discovery-v1': 0.0.20200806
+    dev: true
+
+  /@types/gapi.client.sheets/4.0.20201031:
+    resolution: {integrity: sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==}
+    dependencies:
+      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230221
+    dev: true
+
+  /@types/gapi.client/1.0.5:
+    resolution: {integrity: sha512-OTpbBMuzfC4lkvaomxqskI/iWRGW3zOZbDXZLNSyiuswTiSSGgILRLkg0POuZ4EgzEdaYaTlXpnXiCp07ri/Yw==}
+    dev: true
 
   /@types/gapi/0.0.44:
     resolution: {integrity: sha512-hsgJMfZ/pMwI15UlAYHMNwj8DRoigo1odhbPwEXdp19ZQwQAXbcRrpzaDsfc+9XM6RtGpvl4Ja7uW8A+KPCa7w==}

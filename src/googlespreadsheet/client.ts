@@ -2,15 +2,39 @@ export class SheetClient {
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
   readonly DISCOVERY_DOC =
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
-  readonly sheetId: string;
-  // private gapi: typeof gapi.client;
+  readonly sheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
   private tokenClient?: google.accounts.oauth2.TokenClient;
 
-  constructor(sheetId: string) {
-    this.sheetId = sheetId;
+  private static singleton: SheetClient;
+  private token?: GoogleApiOAuth2TokenObject;
+
+  public static getInstance() {
+    if (!SheetClient.singleton) {
+      SheetClient.singleton = new SheetClient();
+    }
+
+    return SheetClient.singleton;
   }
 
-  public connect() {
+  public saveToken(token: GoogleApiOAuth2TokenObject) {
+    localStorage.setItem("spreadsheet_token", JSON.stringify(token));
+    this.token = token;
+  }
+
+  public getToken() {
+    if (this.token) {
+      return this.token;
+    }
+
+    const stored = localStorage.getItem("spreadsheet_token");
+    if (stored) {
+      this.token = JSON.parse(stored);
+    }
+
+    return this.token;
+  }
+
+  public initialize() {
     if (this.tokenClient) {
       return;
     }
@@ -24,26 +48,24 @@ export class SheetClient {
       });
     }
     gapi.load("client", initializeGapiClient);
+  }
 
+  public requestConsent(callback) {
+    const self = this;
+    this.initialize();
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id:
         "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
-      scope: self.SCOPES,
-      callback: (response: {
-        access_token: string;
-        expires_in: string;
-        scope: string;
-      }) => {
-        console.log(response);
+      scope: this.SCOPES,
+      callback: (token) => {
+        callback(token);
+        self.saveToken(token);
       },
     });
-  }
-
-  public requestConsent() {
-    this.connect();
     if (!this.tokenClient) {
       throw new Error("failed to init token client");
     }
+
     if (gapi.client.getToken() === null) {
       // Prompt the user to select a Google Account and ask for consent to share their data
       // when establishing a new session.
@@ -54,6 +76,11 @@ export class SheetClient {
       this.tokenClient.requestAccessToken({ prompt: "" });
     }
   }
+
+  public hasConsent() {
+    return gapi.client.getToken() !== null;
+  }
+
   public async listMajors() {
     let response;
     try {
