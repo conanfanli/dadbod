@@ -22,7 +22,6 @@ export class SheetClient {
         apiKey: "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg",
         discoveryDocs: [self.DISCOVERY_DOC],
       });
-      console.log("after", gapi.client);
     }
     gapi.load("client", initializeGapiClient);
 
@@ -30,7 +29,11 @@ export class SheetClient {
       client_id:
         "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
       scope: self.SCOPES,
-      callback: (response) => {
+      callback: (response: {
+        access_token: string;
+        expires_in: string;
+        scope: string;
+      }) => {
         console.log(response);
       },
     });
@@ -47,7 +50,33 @@ export class SheetClient {
       this.tokenClient.requestAccessToken({ prompt: "consent" });
     } else {
       // Skip display of account chooser and consent dialog for an existing session.
+      console.log("live spreadsheet session");
       this.tokenClient.requestAccessToken({ prompt: "" });
     }
+  }
+  public async listMajors() {
+    let response;
+    try {
+      // Fetch first 10 files
+      response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
+        range: "Class Data!A2:E",
+      });
+    } catch (err: any) {
+      // document.getElementById("content")!.innerText = err.message;
+      return;
+    }
+    const range = response.result;
+    if (!range || !range.values || range.values.length === 0) {
+      // document.getElementById("content")!.innerText = "No values found.";
+      return;
+    }
+    // Flatten to string to display
+    const output = range.values.reduce(
+      (str, row) => `${str}${row[0]}, ${row[4]}\n`,
+      "Name, Major:\n"
+    );
+    console.log("output", output);
+    return output;
   }
 }
