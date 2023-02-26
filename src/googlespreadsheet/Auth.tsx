@@ -19,12 +19,12 @@ async function listMajors() {
       range: "Class Data!A2:E",
     });
   } catch (err: any) {
-    document.getElementById("content")!.innerText = err.message;
+    // document.getElementById("content")!.innerText = err.message;
     return;
   }
   const range = response.result;
   if (!range || !range.values || range.values.length == 0) {
-    document.getElementById("content")!.innerText = "No values found.";
+    // document.getElementById("content")!.innerText = "No values found.";
     return;
   }
   // Flatten to string to display
@@ -32,7 +32,8 @@ async function listMajors() {
     (str, row) => `${str}${row[0]}, ${row[4]}\n`,
     "Name, Major:\n"
   );
-  document.getElementById("content")!.innerText = output;
+  console.log("output", output);
+  // document.getElementById("content")!.innerText = output;
 }
 function maybeEnableButtons() {
   if (gapiInited && gisInited) {
@@ -60,6 +61,7 @@ async function initializeGapiClient() {
     apiKey: "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg",
     discoveryDocs: [DISCOVERY_DOC],
   });
+  console.log("client is", gapi.client);
   gapiInited = true;
   maybeEnableButtons();
 }
@@ -72,7 +74,7 @@ function handleAuthClick() {
     if (resp.error !== undefined) {
       throw resp;
     }
-    document.getElementById("signout_button")!.style.visibility = "visible";
+    // document.getElementById("signout_button")!.style.visibility = "visible";
     // document.getElementById("authorize_button")!.innerText = "Refresh";
     await listMajors();
   };
