@@ -3,7 +3,8 @@ import { TextField, Button } from "@mui/material";
 import { SheetClient } from "./client";
 import { StateTable } from "./StateTable";
 
-const defaultSheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
+const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
+
 export function Authorize() {
   let client: SheetClient;
   const [hasConsent, setHasConsent] = React.useState(false);
@@ -28,6 +29,7 @@ export function Authorize() {
         defaultValue={defaultSheetId}
         onChange={(event) => {
           setSheetId(event.target.value);
+          localStorage.setItem("spreadsheet_id", event.target.value);
         }}
       />
       <Button
