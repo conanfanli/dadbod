@@ -2,7 +2,6 @@ export class SheetClient {
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
   readonly DISCOVERY_DOC =
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
-  readonly sheetId = "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms";
   private tokenClient?: google.accounts.oauth2.TokenClient;
 
   private static singleton: SheetClient;
@@ -81,29 +80,39 @@ export class SheetClient {
     return gapi.client.getToken() !== null;
   }
 
-  public async listMajors() {
+  public async getName(sheetId: string) {
+    try {
+      // Fetch first 10 files
+      const res = await gapi.client.sheets.spreadsheets.get({
+        spreadsheetId: sheetId,
+      });
+      if (res.status === 200) {
+        return res.result;
+      } else {
+        console.error(res);
+        return null;
+      }
+    } catch (err: any) {
+      console.error(err);
+      return null;
+    }
+  }
+
+  public async getRows(sheetId: string) {
     let response;
     try {
       // Fetch first 10 files
       response = await gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: "1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms",
-        range: "Class Data!A2:E",
+        spreadsheetId: sheetId,
+        range: "A2:B9999",
       });
     } catch (err: any) {
-      // document.getElementById("content")!.innerText = err.message;
       return;
     }
     const range = response.result;
     if (!range || !range.values || range.values.length === 0) {
-      // document.getElementById("content")!.innerText = "No values found.";
       return;
     }
-    // Flatten to string to display
-    const output = range.values.reduce(
-      (str, row) => `${str}${row[0]}, ${row[4]}\n`,
-      "Name, Major:\n"
-    );
-    console.log("output", output);
-    return output;
+    return range.values;
   }
 }
