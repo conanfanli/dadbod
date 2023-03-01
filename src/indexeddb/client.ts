@@ -1,10 +1,10 @@
 export class DbClient {
   readonly DB_NAME = "workout-log";
   private _db?: IDBDatabase;
-  // private exercisesStore?: IDBObjectStore;
+  readonly VERSION = 2;
 
   constructor() {
-    const request = indexedDB.open(this.DB_NAME, 2);
+    const request = indexedDB.open(this.DB_NAME, this.VERSION);
 
     request.onerror = (event) => {
       console.error("error:", event);
@@ -17,7 +17,7 @@ export class DbClient {
     request.onupgradeneeded = (event) => {
       console.log("onupgradeneeded");
       this.db = request.result;
-      if (event.oldVersion < 2) {
+      if (event.oldVersion < this.VERSION) {
         this.db.deleteObjectStore("exercises");
       }
       this.db.createObjectStore("exercises", {
