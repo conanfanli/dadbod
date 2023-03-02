@@ -22,7 +22,6 @@ export class DbClient {
       }
       this.db.createObjectStore("exercises", {
         keyPath: "name",
-        autoIncrement: true,
       });
     };
   }
