@@ -17,7 +17,7 @@ export class DbClient {
     request.onupgradeneeded = (event) => {
       console.log("onupgradeneeded");
       this.db = request.result;
-      if (event.oldVersion < this.VERSION) {
+      if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
         this.db.deleteObjectStore("exercises");
       }
       this.db.createObjectStore("exercises", {
