@@ -3,7 +3,7 @@ export class DbClient {
   private _db?: IDBDatabase;
   readonly VERSION = 2;
 
-  constructor() {
+  constructor(onSuccess) {
     const request = indexedDB.open(this.DB_NAME, this.VERSION);
 
     request.onerror = (event) => {
@@ -11,7 +11,8 @@ export class DbClient {
     };
     request.onsuccess = (event) => {
       this._db = (event as any).target.result;
-      console.log("success", this._db);
+      onSuccess(this);
+      // console.log("success", this._db);
     };
 
     request.onupgradeneeded = (event) => {
@@ -39,6 +40,15 @@ export class DbClient {
     this._db = v;
   }
 
+  public listExercises(onSuccess) {
+    const request = this.db
+      .transaction("exercises")
+      .objectStore("exercises")
+      .getAll();
+    request.onsuccess = () => {
+      onSuccess(request.result);
+    };
+  }
   public addExercise(data: { name: string; description: string }) {
     console.log("adding", data);
     const store = this.db
