@@ -24,6 +24,7 @@ Monday gameday:
 - Box breathing
 - Farmer carry
 - 10 min light cardio
+- Medicine ball throw
 
 Tuesday recovery:
 
