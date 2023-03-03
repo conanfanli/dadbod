@@ -2,6 +2,7 @@ import { ListItemText, List, ListItem, ListItemButton } from "@mui/material";
 import * as React from "react";
 import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
+import ExpandLess from "@mui/icons-material/ExpandLess";
 
 interface IExercise {
   name: string;
