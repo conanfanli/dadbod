@@ -39,11 +39,11 @@ export class DbClient {
     this._db = v;
   }
 
-  public addExercise() {
-    console.log("addd");
+  public addExercise(data: { name: string; description: string }) {
+    console.log("adding", data);
     const store = this.db
       .transaction("exercises", "readwrite")
       .objectStore("exercises");
-    store.add({ name: "plank" });
+    store.add(data);
   }
 }

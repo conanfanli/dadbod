@@ -1,7 +1,10 @@
 ## Use cases
 
-1. View workouts
 1. Record workouts
+
+   - Pick an exercise. Dispaly sets, reps, last time performed
+
+1. View workouts
 1. CRUD exercises
 
 ## Macro Workout Strategies
@@ -15,7 +18,7 @@ A upper body pump/strength workout may feature shoulder, chest and back.
 
 Sample routine:
 
-Monday gameday:
+### Monday gameday:
 
 - Isometrics: single leg hold, side bridge, calf hold/raise
 - Ploymetrics (feature): box/depth jumps
@@ -26,7 +29,7 @@ Monday gameday:
 - 10 min light cardio
 - Medicine ball throw
 
-Tuesday recovery:
+### Tuesday recovery:
 
 - Isometrics (feature): plank, glute/abductor hold
 - light cardio
@@ -37,26 +40,26 @@ Tuesday recovery:
 - Inversion
 - BFR
 
-Wednesday heavy:
+### Wednesday heavy:
 
 - Deadlift variations: sumo, RDL, trapbar, unilateral etc...
 - Bent-over row
 - 1 RPM machine bench
 - Box breathing
 
-Thursday plyometrics:
+### Thursday plyometrics:
 
 Mostly same as Monday but swap similar excercises.
 
 Can add weighted explosive movements and short range impulses.
 
-Friday recovery:
+### Friday recovery:
 
 Mostly same as Tuesday
 
-Saturday heavy
+### Saturday heavy
 
 Same as Wednesday but may swap deadlifts for squats.
 Can swap back with shoulder exercises
 
-Sunday rest/walk
+### Sunday rest/walk
