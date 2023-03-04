@@ -5,11 +5,16 @@ import {
   ListItemButton,
   IconButton,
   Collapse,
+  Box,
+  TextField,
+  ListItemIcon,
 } from "@mui/material";
 import * as React from "react";
 import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
+import Remove from "@mui/icons-material/Remove";
 import Delete from "@mui/icons-material/Delete";
+import AddIcon from "@mui/icons-material/Add";
 
 interface IExercise {
   name: string;
@@ -74,11 +79,30 @@ function ExerciseList({ client }: { client: DbClient }) {
 function LogEntry({ row, open }: { row: IExercise; open: boolean }) {
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
-      <List component="div" disablePadding>
-        <ListItemButton sx={{ width: "100%" }}>
-          <ListItemText primary="Starred" />
-        </ListItemButton>
-      </List>
+      <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+        <div>
+          <TextField
+            label="set"
+            sx={{ m: 1, width: "10%" }}
+            value={1}
+            disabled
+            size="small"
+          />
+          <TextField label="Weight" size="small" sx={{ m: 1, width: "36%" }} />
+          <TextField label="Reps" sx={{ m: 1, width: "36%" }} size="small" />
+        </div>
+      </Box>
+      <ListItem
+        secondaryAction={
+          <IconButton>
+            <Remove color="error" />
+          </IconButton>
+        }
+      >
+        <ListItemIcon>
+          <AddIcon color="primary" />
+        </ListItemIcon>
+      </ListItem>
     </Collapse>
   );
 }
