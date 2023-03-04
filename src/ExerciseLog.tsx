@@ -58,13 +58,23 @@ export function ExerciseLog({
         }}
       >
         <ListItemIcon>
-          <AddIcon color="primary" />
+          <AddIcon
+            color="primary"
+            onClick={() => {
+              setSets([...sets, { setNumber: 1, weight: 0, reps: 0 }]);
+            }}
+          />
         </ListItemIcon>
         <Button variant="contained" onClick={onSubmit}>
           Log
         </Button>
         <ListItemIcon>
-          <Remove color="error" />
+          <Remove
+            color="error"
+            onClick={() => {
+              setSets(sets.slice(0, sets.length - 1));
+            }}
+          />
         </ListItemIcon>
       </ListItem>
     </Collapse>
