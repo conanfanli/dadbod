@@ -8,6 +8,7 @@ import {
   Box,
   TextField,
   ListItemIcon,
+  Button,
 } from "@mui/material";
 import * as React from "react";
 import { DbClient } from "./indexeddb/client";
@@ -77,6 +78,9 @@ function ExerciseList({ client }: { client: DbClient }) {
 }
 
 function LogEntry({ row, open }: { row: IExercise; open: boolean }) {
+  const [weight, setWeight] = React.useState(0);
+  const [reps, setReps] = React.useState(0);
+
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       <Box sx={{ display: "flex", flexWrap: "wrap" }}>
@@ -88,19 +92,37 @@ function LogEntry({ row, open }: { row: IExercise; open: boolean }) {
             disabled
             size="small"
           />
-          <TextField label="Weight" size="small" sx={{ m: 1, width: "36%" }} />
-          <TextField label="Reps" sx={{ m: 1, width: "36%" }} size="small" />
+          <TextField
+            label="Weight"
+            value={weight}
+            onChange={(e) => setWeight(Number(e.target.value))}
+            inputProps={{ inputMode: "numeric" }}
+            size="small"
+            sx={{ m: 1, width: "36%" }}
+          />
+          <TextField
+            inputProps={{ inputMode: "numeric" }}
+            value={reps}
+            label="Reps"
+            sx={{ m: 1, width: "36%" }}
+            onChange={(e) => setReps}
+            size="small"
+          />
         </div>
       </Box>
       <ListItem
-        secondaryAction={
-          <IconButton>
-            <Remove color="error" />
-          </IconButton>
-        }
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          pr: 0,
+        }}
       >
         <ListItemIcon>
           <AddIcon color="primary" />
+        </ListItemIcon>
+        <Button variant="contained">Log</Button>
+        <ListItemIcon>
+          <Remove color="error" />
         </ListItemIcon>
       </ListItem>
     </Collapse>
