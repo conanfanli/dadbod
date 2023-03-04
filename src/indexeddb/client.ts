@@ -66,6 +66,15 @@ export class DbClient {
       onSuccess(request.result);
     };
   }
+  public listLogs(onSuccess) {
+    const request = this.db
+      .transaction("exercise_logs")
+      .objectStore("exercise_logs")
+      .getAll();
+    request.onsuccess = () => {
+      onSuccess(request.result);
+    };
+  }
   public addExercise(data: { name: string; description: string }) {
     const store = this.db
       .transaction("exercises", "readwrite")

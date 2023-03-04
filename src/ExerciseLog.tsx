@@ -26,7 +26,6 @@ export function ExerciseLog({
   const [sets, setSets] = React.useState<ISet[]>([]);
 
   function putSet(newSet: ISet) {
-    console.log("put set", newSet);
     const newSets = setsWithNewRow.map((s, i) => {
       return i === newSet.setNumber - 1 ? newSet : s;
     });
