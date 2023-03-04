@@ -18,7 +18,13 @@ export class DbClient {
     };
 
     request.onupgradeneeded = (event) => {
-      console.log("onupgradeneeded", "oldVersion:", event.oldVersion, "latest:", this.VERSION);
+      console.log(
+        "onupgradeneeded",
+        "oldVersion:",
+        event.oldVersion,
+        "latest:",
+        this.VERSION
+      );
       this.db = request.result;
       if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
         this.db.deleteObjectStore("exercises");
@@ -27,8 +33,8 @@ export class DbClient {
         keyPath: "name",
       });
       this.db.createObjectStore("exercise_logs", {
-        keyPath: ["date", "exerciseName"]
-      })
+        keyPath: ["date", "exerciseName"],
+      });
     };
   }
 
@@ -46,8 +52,10 @@ export class DbClient {
   }
 
   public logExercise(data: IExerciseLog) {
-    const store = this.db.transaction("exercise_logs", "readwrite").objectStore("exercise_logs")
-    store.add(data)
+    const store = this.db
+      .transaction("exercise_logs", "readwrite")
+      .objectStore("exercise_logs");
+    store.put(data);
   }
   public listExercises(onSuccess) {
     const request = this.db
@@ -62,13 +70,16 @@ export class DbClient {
     const store = this.db
       .transaction("exercises", "readwrite")
       .objectStore("exercises");
-    store.add(data);
+    store.put(data);
   }
 
   public deleteExercise(name: string, onSuccess: () => void) {
-    const request = this.db.transaction("exercises", "readwrite").objectStore("exercises").delete(name)
+    const request = this.db
+      .transaction("exercises", "readwrite")
+      .objectStore("exercises")
+      .delete(name);
     request.onsuccess = (event) => {
-      onSuccess()
-    }
+      onSuccess();
+    };
   }
 }
