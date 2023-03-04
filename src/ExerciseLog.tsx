@@ -25,11 +25,16 @@ export function ExerciseLog({
 }) {
   const [sets, setSets] = React.useState<ISet[]>([]);
 
-  function onSubmit() {
+  function putSet(newSet: ISet) {
+    console.log("put set", newSet);
+    const newSets = setsWithNewRow.map((s, i) => {
+      return i === newSet.setNumber - 1 ? newSet : s;
+    });
+    setSets(newSets);
     client.logExercise({
       date: today,
       exerciseName: row.name,
-      sets: sets,
+      sets: newSets,
     });
   }
   const setsWithNewRow =
@@ -37,18 +42,7 @@ export function ExerciseLog({
   return (
     <Collapse in={open} timeout="auto" unmountOnExit>
       {setsWithNewRow.map((s, index) => {
-        return (
-          <SetEntry
-            key={index}
-            setNumber={index + 1}
-            putSet={(newSet: ISet) => {
-              const newSets = setsWithNewRow.map((s, i) => {
-                return i === index ? newSet : s;
-              });
-              return setSets(newSets);
-            }}
-          />
-        );
+        return <SetEntry key={index} setNumber={index + 1} putSet={putSet} />;
       })}
       <ListItem
         sx={{
@@ -65,9 +59,6 @@ export function ExerciseLog({
             }}
           />
         </ListItemIcon>
-        <Button variant="contained" onClick={onSubmit}>
-          Log
-        </Button>
         <ListItemIcon>
           <Remove
             color="error"
@@ -86,11 +77,24 @@ function SetEntry({
   putSet,
 }: {
   setNumber: number;
-  putSet: (arg0: ISet) => void;
+  putSet: (newSet: ISet) => void;
 }) {
   const [weight, setWeight] = React.useState(0);
   const [reps, setReps] = React.useState(0);
 
+  function onWeightChange(e) {
+    setWeight(Number(e.target.value));
+    if (reps) {
+      putSet({ setNumber, reps, weight: Number(e.target.value) });
+    }
+  }
+  function onRepsChange(e) {
+    const value = Number(e.target.value);
+    setReps(value);
+    if (value) {
+      putSet({ setNumber, weight, reps: value });
+    }
+  }
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
       <div>
@@ -103,21 +107,19 @@ function SetEntry({
         />
         <TextField
           label="Weight"
-          value={weight}
-          onChange={(e) => setWeight(Number(e.target.value))}
+          value={weight || ""}
+          onChange={onWeightChange}
           inputProps={{ inputMode: "numeric" }}
           size="small"
           sx={{ m: 1, width: "36%" }}
         />
         <TextField
           inputProps={{ inputMode: "numeric" }}
-          value={reps}
+          value={reps || ""}
           label="Reps"
+          error={reps === 0}
           sx={{ m: 1, width: "36%" }}
-          onChange={(e) => {
-            setReps(Number(e.target.value));
-            putSet({ setNumber, weight, reps: Number(e.target.value) });
-          }}
+          onChange={onRepsChange}
           size="small"
         />
       </div>
