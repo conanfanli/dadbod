@@ -3,10 +3,14 @@ lockfileVersion: 5.4
 specifiers:
   '@emotion/react': ^11.10.6
   '@emotion/styled': ^11.10.6
+  '@mui/icons-material': ^5.11.11
   '@mui/material': ^5.11.10
   '@testing-library/jest-dom': ^5.16.5
   '@testing-library/react': ^13.4.0
   '@testing-library/user-event': ^13.5.0
+  '@types/gapi': ^0.0.44
+  '@types/gapi.client.sheets': ^4.0.20201031
+  '@types/google.accounts': ^0.0.6
   '@types/jest': ^27.5.2
   '@types/node': ^16.18.12
   '@types/react': ^18.0.28
@@ -22,6 +26,7 @@ specifiers:
 dependencies:
   '@emotion/react': 11.10.6_pmekkgnqduwlme35zpnqhenc34
   '@emotion/styled': 11.10.6_oouaibmszuch5k64ms7uxp2aia
+  '@mui/icons-material': 5.11.11_ylmaxqh5wvme7ymgn4ys5vax6u
   '@mui/material': 5.11.10_xqeqsl5kvjjtyxwyi3jhw3yuli
   '@testing-library/jest-dom': 5.16.5
   '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
@@ -38,6 +43,9 @@ dependencies:
   web-vitals: 2.1.4
 
 devDependencies:
+  '@types/gapi': 0.0.44
+  '@types/gapi.client.sheets': 4.0.20201031
+  '@types/google.accounts': 0.0.6
   '@types/testing-library__jest-dom': 5.14.5
 
 packages:
@@ -2039,6 +2047,20 @@ packages:
     resolution: {integrity: sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==}
     dev: false
 
+  /@maxim_mazurok/gapi.client.discovery-v1/0.0.20200806:
+    resolution: {integrity: sha512-0pZtrElj8bc0YROIo7nH8VVvks/iww/L68l7r74oC9+ksSVO3Lum1zUR8dXTvJ7TqLGaNYiiNaUZianK6doh/w==}
+    dependencies:
+      '@types/gapi.client': 1.0.5
+      '@types/gapi.client.discovery': 1.0.9
+    dev: true
+
+  /@maxim_mazurok/gapi.client.sheets-v4/0.0.20230227:
+    resolution: {integrity: sha512-tEnnWlcazS6+DXY5QGjh9u3zPw3v1mltaNxdshI0Me110X3P0+GbFRi0PJlsi8mOWJfJh19Y98GC1RS462AezA==}
+    dependencies:
+      '@types/gapi.client': 1.0.5
+      '@types/gapi.client.discovery': 1.0.9
+    dev: true
+
   /@mui/base/5.0.0-alpha.118_zula6vjvt3wdocc4mwcxqa6nzi:
     resolution: {integrity: sha512-GAEpqhnuHjRaAZLdxFNuOf2GDTp9sUawM46oHZV4VnYPFjXJDkIYFWfIQLONb0nga92OiqS5DD/scGzVKCL0Mw==}
     engines: {node: '>=12.0.0'}
@@ -2065,6 +2087,23 @@ packages:
 
   /@mui/core-downloads-tracker/5.11.9:
     resolution: {integrity: sha512-YGEtucQ/Nl91VZkzYaLad47Cdui51n/hW+OQm4210g4N3/nZzBxmGeKfubEalf+ShKH4aYDS86XTO6q/TpZnjQ==}
+    dev: false
+
+  /@mui/icons-material/5.11.11_ylmaxqh5wvme7ymgn4ys5vax6u:
+    resolution: {integrity: sha512-Eell3ADmQVE8HOpt/LZ3zIma8JSvPh3XgnhwZLT0k5HRqZcd6F/QDHc7xsWtgz09t+UEFvOYJXjtrwKmLdwwpw==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      '@mui/material': ^5.0.0
+      '@types/react': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.21.0
+      '@mui/material': 5.11.10_xqeqsl5kvjjtyxwyi3jhw3yuli
+      '@types/react': 18.0.28
+      react: 18.2.0
     dev: false
 
   /@mui/material/5.11.10_xqeqsl5kvjjtyxwyi3jhw3yuli:
@@ -2628,6 +2667,30 @@ packages:
       '@types/qs': 6.9.7
       '@types/serve-static': 1.15.0
     dev: false
+
+  /@types/gapi.client.discovery/1.0.9:
+    resolution: {integrity: sha512-51fXpt7DM7+zPG5pgwnNr3KaRXmyszznu66VPpV7+FAu0LGtpTohvdfvkRCnCn2Z6EgNTq/baFAtCa/9ylHOug==}
+    dependencies:
+      '@maxim_mazurok/gapi.client.discovery-v1': 0.0.20200806
+    dev: true
+
+  /@types/gapi.client.sheets/4.0.20201031:
+    resolution: {integrity: sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==}
+    dependencies:
+      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230227
+    dev: true
+
+  /@types/gapi.client/1.0.5:
+    resolution: {integrity: sha512-OTpbBMuzfC4lkvaomxqskI/iWRGW3zOZbDXZLNSyiuswTiSSGgILRLkg0POuZ4EgzEdaYaTlXpnXiCp07ri/Yw==}
+    dev: true
+
+  /@types/gapi/0.0.44:
+    resolution: {integrity: sha512-hsgJMfZ/pMwI15UlAYHMNwj8DRoigo1odhbPwEXdp19ZQwQAXbcRrpzaDsfc+9XM6RtGpvl4Ja7uW8A+KPCa7w==}
+    dev: true
+
+  /@types/google.accounts/0.0.6:
+    resolution: {integrity: sha512-6+SAci9zmUjZFdKVghK0oeBOnf+uVT2Actd+SMC7AjUsejp+VuAw6OkTwasZrEo6I1By/Hlt+mKhuXvfLrcYMQ==}
+    dev: true
 
   /@types/graceful-fs/4.1.6:
     resolution: {integrity: sha512-Sig0SNORX9fdW+bQuTEovKj3uHcUL6LQKbCrrqb1X7J6/ReAbhCXRAhc+SMejhLELFj2QcyuxmUooZ4bt5ReSw==}

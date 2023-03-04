@@ -1,46 +1,66 @@
-# Getting Started with Create React App
+## Use cases
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+1. Record workouts
 
-## Available Scripts
+   - Pick an exercise. Dispaly sets, reps, last time performed
 
-In the project directory, you can run:
+1. View workouts
+1. CRUD exercises
 
-### `npm start`
+## Macro Workout Strategies
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+I want to list a few standard routine workouts. Each workout is featured by
+a few stapled exercises.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+For example, a power workout should feature speed and/or plyometrics;
+a lower body strength workout may feature deadlifts.
+A upper body pump/strength workout may feature shoulder, chest and back.
 
-### `npm test`
+Sample routine:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Monday gameday:
 
-### `npm run build`
+- Isometrics: single leg hold, side bridge, calf hold/raise
+- Ploymetrics (feature): box/depth jumps
+- Single leg RDL
+- Nordic curl
+- Box breathing
+- Farmer carry
+- 10 min light cardio
+- Medicine ball throw
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Tuesday recovery:
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- rotational, core
+- Isometrics (feature): plank, glute/abductor hold
+- light cardio
+- Massage, foam rolling, stretch
+- Cold plunge, sauna
+- Upper body pump: chest, biceps, triceps, back
+- Box breathing (feature)
+- Inversion
+- BFR
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+### Wednesday heavy:
 
-### `npm run eject`
+- Deadlift variations: sumo, RDL, trapbar, unilateral etc...
+- Bent-over row
+- 1 RPM machine bench
+- Box breathing
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+### Thursday plyometrics:
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Mostly same as Monday but swap similar excercises.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Can add weighted explosive movements and short range impulses.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Friday recovery:
 
-## Learn More
+Mostly same as Tuesday
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Saturday heavy
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Same as Wednesday but may swap deadlifts for squats.
+Can swap back with shoulder exercises
+
+### Sunday rest/walk
