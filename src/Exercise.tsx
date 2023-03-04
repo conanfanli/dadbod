@@ -4,6 +4,7 @@ import {
   ListItem,
   ListItemButton,
   IconButton,
+  Collapse,
 } from "@mui/material";
 import * as React from "react";
 import { DbClient } from "./indexeddb/client";
@@ -17,11 +18,9 @@ interface IExercise {
 
 export function Exercises() {
   const [client, setClient] = React.useState<DbClient | null>(null);
+
   React.useEffect(() => {
     new DbClient((c) => setClient(c));
-    // const rows = client.listExercises();
-    // console.log(rows);
-    // setRows(rows);
   });
   if (!client) return <div></div>;
 
@@ -39,14 +38,17 @@ export function Exercises() {
 
 function ExerciseList({ client }: { client: DbClient }) {
   const [rows, setRows] = React.useState<Array<IExercise>>([]);
+  const [active, setActive] = React.useState("");
+
   React.useEffect(() => {
     client.listExercises((rows) => setRows(rows));
   });
+
   return (
-    <List>
-      {rows.map((row) => (
+    <List sx={{ width: "100%" }}>
+      {rows.map((row) => [
         <ListItem key={row.name} disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={() => setActive(row.name)}>
             <ListItemText key={row.name} primary={row.name} />
             <IconButton
               onClick={() =>
@@ -58,8 +60,25 @@ function ExerciseList({ client }: { client: DbClient }) {
               <Delete color="secondary" />
             </IconButton>
           </ListItemButton>
-        </ListItem>
-      ))}
+        </ListItem>,
+        <LogEntry
+          open={active === row.name}
+          key={`${row.name}-collapse`}
+          row={row}
+        />,
+      ])}
     </List>
+  );
+}
+
+function LogEntry({ row, open }: { row: IExercise; open: boolean }) {
+  return (
+    <Collapse in={open} timeout="auto" unmountOnExit>
+      <List component="div" disablePadding>
+        <ListItemButton sx={{ width: "100%" }}>
+          <ListItemText primary="Starred" />
+        </ListItemButton>
+      </List>
+    </Collapse>
   );
 }
