@@ -10,11 +10,9 @@ import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
 import Delete from "@mui/icons-material/Delete";
 import {ExerciseLog} from './ExerciseLog'
+import { IExercise } from "./types";
 
-export interface IExercise {
-  name: string;
-  description: string;
-}
+
 
 export function Exercises() {
   const [client, setClient] = React.useState<DbClient | null>(null);
@@ -62,6 +60,7 @@ function ExerciseList({ client }: { client: DbClient }) {
           </ListItemButton>
         </ListItem>,
         <ExerciseLog
+          client={client}
           open={active === row.name}
           key={`${row.name}-collapse`}
           row={row}

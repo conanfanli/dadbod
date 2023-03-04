@@ -1,7 +1,9 @@
+import { IExerciseLog } from "../types";
+
 export class DbClient {
   readonly DB_NAME = "workout-log";
   private _db?: IDBDatabase;
-  readonly VERSION = 2;
+  readonly VERSION = 3;
 
   constructor(onSuccess) {
     const request = indexedDB.open(this.DB_NAME, this.VERSION);
@@ -16,7 +18,7 @@ export class DbClient {
     };
 
     request.onupgradeneeded = (event) => {
-      console.log("onupgradeneeded");
+      console.log("onupgradeneeded", "oldVersion:", event.oldVersion, "latest:", this.VERSION);
       this.db = request.result;
       if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
         this.db.deleteObjectStore("exercises");
@@ -24,6 +26,9 @@ export class DbClient {
       this.db.createObjectStore("exercises", {
         keyPath: "name",
       });
+      this.db.createObjectStore("exercise_logs", {
+        keyPath: ["date", "exerciseName"]
+      })
     };
   }
 
@@ -40,6 +45,10 @@ export class DbClient {
     this._db = v;
   }
 
+  public logExercise(data: IExerciseLog) {
+    const store = this.db.transaction("exercise_logs", "readwrite").objectStore("exercise_logs")
+    store.add(data)
+  }
   public listExercises(onSuccess) {
     const request = this.db
       .transaction("exercises")
