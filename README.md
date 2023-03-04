@@ -31,6 +31,7 @@ Sample routine:
 
 ### Tuesday recovery:
 
+- rotational, core
 - Isometrics (feature): plank, glute/abductor hold
 - light cardio
 - Massage, foam rolling, stretch
