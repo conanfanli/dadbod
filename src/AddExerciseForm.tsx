@@ -36,6 +36,7 @@ export function AddExerciseForm(props: {
           <TextField
             error={name === ""}
             onChange={(e) => setName(e.target.value)}
+            value={name}
             fullWidth
             required
             helperText="Name"
@@ -43,6 +44,7 @@ export function AddExerciseForm(props: {
           <TextField
             onChange={(e) => setDescription(e.target.value)}
             fullWidth
+            value={description}
             required
             helperText="Description"
           />
