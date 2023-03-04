@@ -50,10 +50,16 @@ export class DbClient {
     };
   }
   public addExercise(data: { name: string; description: string }) {
-    console.log("adding", data);
     const store = this.db
       .transaction("exercises", "readwrite")
       .objectStore("exercises");
     store.add(data);
+  }
+
+  public deleteExercise(name: string, onSuccess: () => void) {
+    const request = this.db.transaction("exercises", "readwrite").objectStore("exercises").delete(name)
+    request.onsuccess = (event) => {
+      onSuccess()
+    }
   }
 }

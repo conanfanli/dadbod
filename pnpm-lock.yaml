@@ -3,6 +3,7 @@ lockfileVersion: 5.4
 specifiers:
   '@emotion/react': ^11.10.6
   '@emotion/styled': ^11.10.6
+  '@mui/icons-material': ^5.11.11
   '@mui/material': ^5.11.10
   '@testing-library/jest-dom': ^5.16.5
   '@testing-library/react': ^13.4.0
@@ -25,6 +26,7 @@ specifiers:
 dependencies:
   '@emotion/react': 11.10.6_pmekkgnqduwlme35zpnqhenc34
   '@emotion/styled': 11.10.6_oouaibmszuch5k64ms7uxp2aia
+  '@mui/icons-material': 5.11.11_ylmaxqh5wvme7ymgn4ys5vax6u
   '@mui/material': 5.11.10_xqeqsl5kvjjtyxwyi3jhw3yuli
   '@testing-library/jest-dom': 5.16.5
   '@testing-library/react': 13.4.0_biqbaboplfbrettd7655fr4n2y
@@ -2052,8 +2054,8 @@ packages:
       '@types/gapi.client.discovery': 1.0.9
     dev: true
 
-  /@maxim_mazurok/gapi.client.sheets-v4/0.0.20230221:
-    resolution: {integrity: sha512-nrAfK8SJgS2YG6uZMNAL4KjibZst+NfRJc0ovtIbhA4aLLSPpK5/nWaIOPiHvEzzuNGAk/wiUfKKXjfABOgCaw==}
+  /@maxim_mazurok/gapi.client.sheets-v4/0.0.20230227:
+    resolution: {integrity: sha512-tEnnWlcazS6+DXY5QGjh9u3zPw3v1mltaNxdshI0Me110X3P0+GbFRi0PJlsi8mOWJfJh19Y98GC1RS462AezA==}
     dependencies:
       '@types/gapi.client': 1.0.5
       '@types/gapi.client.discovery': 1.0.9
@@ -2085,6 +2087,23 @@ packages:
 
   /@mui/core-downloads-tracker/5.11.9:
     resolution: {integrity: sha512-YGEtucQ/Nl91VZkzYaLad47Cdui51n/hW+OQm4210g4N3/nZzBxmGeKfubEalf+ShKH4aYDS86XTO6q/TpZnjQ==}
+    dev: false
+
+  /@mui/icons-material/5.11.11_ylmaxqh5wvme7ymgn4ys5vax6u:
+    resolution: {integrity: sha512-Eell3ADmQVE8HOpt/LZ3zIma8JSvPh3XgnhwZLT0k5HRqZcd6F/QDHc7xsWtgz09t+UEFvOYJXjtrwKmLdwwpw==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      '@mui/material': ^5.0.0
+      '@types/react': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.21.0
+      '@mui/material': 5.11.10_xqeqsl5kvjjtyxwyi3jhw3yuli
+      '@types/react': 18.0.28
+      react: 18.2.0
     dev: false
 
   /@mui/material/5.11.10_xqeqsl5kvjjtyxwyi3jhw3yuli:
@@ -2658,7 +2677,7 @@ packages:
   /@types/gapi.client.sheets/4.0.20201031:
     resolution: {integrity: sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==}
     dependencies:
-      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230221
+      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230227
     dev: true
 
   /@types/gapi.client/1.0.5:

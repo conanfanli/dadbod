@@ -1,8 +1,14 @@
-import { ListItemText, List, ListItem, ListItemButton } from "@mui/material";
+import {
+  ListItemText,
+  List,
+  ListItem,
+  ListItemButton,
+  IconButton,
+} from "@mui/material";
 import * as React from "react";
 import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
-import ExpandLess from "@mui/icons-material/ExpandLess";
+import Delete from "@mui/icons-material/Delete";
 
 interface IExercise {
   name: string;
@@ -31,7 +37,7 @@ export function Exercises() {
   );
 }
 
-function ExerciseList({ client }) {
+function ExerciseList({ client }: { client: DbClient }) {
   const [rows, setRows] = React.useState<Array<IExercise>>([]);
   React.useEffect(() => {
     client.listExercises((rows) => setRows(rows));
@@ -42,6 +48,15 @@ function ExerciseList({ client }) {
         <ListItem key={row.name} disablePadding>
           <ListItemButton>
             <ListItemText key={row.name} primary={row.name} />
+            <IconButton
+              onClick={() =>
+                client.deleteExercise(row.name, () =>
+                  setRows(rows.filter((r) => r.name !== row.name))
+                )
+              }
+            >
+              <Delete color="secondary" />
+            </IconButton>
           </ListItemButton>
         </ListItem>
       ))}
