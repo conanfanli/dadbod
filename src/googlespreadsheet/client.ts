@@ -6,16 +6,7 @@ export class SheetClient {
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
   private tokenClient?: google.accounts.oauth2.TokenClient;
 
-  private static singleton: SheetClient;
   private token?: GoogleApiOAuth2TokenObject;
-
-  public static getInstance() {
-    if (!SheetClient.singleton) {
-      SheetClient.singleton = new SheetClient();
-    }
-
-    return SheetClient.singleton;
-  }
 
   public saveToken(token: GoogleApiOAuth2TokenObject) {
     localStorage.setItem("spreadsheet_token", JSON.stringify(token));
@@ -43,13 +34,7 @@ export class SheetClient {
     const self = this;
 
     async function initializeGapiClient() {
-      await gapi.client.init({
-        apiKey: "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg",
-        discoveryDocs: [self.DISCOVERY_DOC],
-        scope: self.SCOPES,
-        clientId:
-          "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
-      });
+      await gapi.client.init({});
     }
     // gapi.auth2.getAuthInstance().isSignedIn.listen();
     gapi.load("client", initializeGapiClient);

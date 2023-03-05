@@ -64,3 +64,8 @@ Same as Wednesday but may swap deadlifts for squats.
 Can swap back with shoulder exercises
 
 ### Sunday rest/walk
+
+
+## Google API references
+
+Migrating to new auth: https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#gapi-asyncawait

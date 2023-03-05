@@ -50,7 +50,6 @@ export function Authorize() {
         variant="contained"
         fullWidth
         onClick={async () => {
-          const info = await client.getName(sheetId);
           const dbClient = new DbClient();
           await dbClient.connect();
           await client.saveState(sheetId, dbClient);
