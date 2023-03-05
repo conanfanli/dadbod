@@ -16,30 +16,37 @@ const today = new Date().toISOString().slice(0, 10);
 
 export function ExerciseLog({
   row,
-  open,
-  client,
-}: {
-  client: DbClient;
+}: // client,
+{
+  //client: DbClient;
   row: IExercise;
-  open: boolean;
 }) {
   const [sets, setSets] = React.useState<ISet[]>([]);
+  /*
+  React.useEffect(() => {
+    client.listLogs((rows) => {
+      console.log(rows);
+      setSets(rows);
+    });
+  }); */
 
   function putSet(newSet: ISet) {
     const newSets = setsWithNewRow.map((s, i) => {
       return i === newSet.setNumber - 1 ? newSet : s;
     });
     setSets(newSets);
+    /*
     client.logExercise({
       date: today,
       exerciseName: row.name,
       sets: newSets,
-    });
+    }); */
   }
+
   const setsWithNewRow =
     sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
   return (
-    <Collapse in={open} timeout="auto" unmountOnExit>
+    <Collapse in={true}>
       {setsWithNewRow.map((s, index) => {
         return <SetEntry key={index} setNumber={index + 1} putSet={putSet} />;
       })}

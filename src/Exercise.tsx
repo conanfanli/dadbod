@@ -9,19 +9,26 @@ import * as React from "react";
 import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
 import Delete from "@mui/icons-material/Delete";
-import {ExerciseLog} from './ExerciseLog'
+import { ExerciseLog } from "./ExerciseLog";
 import { IExercise } from "./types";
 
-
-
 export function Exercises() {
-  const [client, setClient] = React.useState<DbClient | null>(null);
+  const client = new DbClient();
+  const [exercises, setExercises] = React.useState<Array<IExercise>>([]);
 
   React.useEffect(() => {
-    new DbClient((c) => setClient(c));
-  });
-  if (!client) return <div></div>;
+    const connectDb = async () => {
+      await client.connect();
+      client.listExercises((rows) => setExercises(rows));
+    };
+    connectDb();
+  }, []);
 
+  function deleteExercise(name: string) {
+    client.deleteExercise(name, () =>
+      setExercises(exercises.filter((r) => r.name !== name))
+    );
+  }
   return (
     <div>
       <AddExerciseForm
@@ -29,42 +36,34 @@ export function Exercises() {
           client.addExercise(data);
         }}
       />
-      <ExerciseList client={client} />
+      <ExerciseList exercises={exercises} deleteExercise={deleteExercise} />
     </div>
   );
 }
 
-function ExerciseList({ client }: { client: DbClient }) {
-  const [rows, setRows] = React.useState<Array<IExercise>>([]);
+function ExerciseList({
+  exercises,
+  deleteExercise,
+}: {
+  exercises: Array<IExercise>;
+  deleteExercise: (name: string) => void;
+}) {
   const [active, setActive] = React.useState("");
 
-  React.useEffect(() => {
-    client.listExercises((rows) => setRows(rows));
-  });
+  console.log("render exercises list");
 
   return (
     <List sx={{ width: "100%" }}>
-      {rows.map((row) => [
+      {exercises.map((row, index) => [
         <ListItem key={row.name} disablePadding>
           <ListItemButton onClick={() => setActive(row.name)}>
             <ListItemText key={row.name} primary={row.name} />
-            <IconButton
-              onClick={() =>
-                client.deleteExercise(row.name, () =>
-                  setRows(rows.filter((r) => r.name !== row.name))
-                )
-              }
-            >
+            <IconButton onClick={() => deleteExercise(row.name)}>
               <Delete color="secondary" />
             </IconButton>
           </ListItemButton>
         </ListItem>,
-        <ExerciseLog
-          client={client}
-          open={active === row.name}
-          key={`${row.name}-collapse`}
-          row={row}
-        />,
+        <ExerciseLog key={index} row={row} />,
       ])}
     </List>
   );

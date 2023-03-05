@@ -5,37 +5,42 @@ export class DbClient {
   private _db?: IDBDatabase;
   readonly VERSION = 3;
 
-  constructor(onSuccess) {
-    const request = indexedDB.open(this.DB_NAME, this.VERSION);
+  public async connect() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.DB_NAME, this.VERSION);
 
-    request.onerror = (event) => {
-      console.error("error:", event);
-    };
-    request.onsuccess = (event) => {
-      this._db = (event as any).target.result;
-      onSuccess(this);
-      // console.log("success", this._db);
-    };
+      request.onerror = (event) => {
+        console.error("error:", event);
+        reject(event);
+      };
+      request.onsuccess = (event) => {
+        this._db = (event as any).target.result;
+        resolve(this._db);
+      };
 
-    request.onupgradeneeded = (event) => {
-      console.log(
-        "onupgradeneeded",
-        "oldVersion:",
-        event.oldVersion,
-        "latest:",
-        this.VERSION
-      );
-      this.db = request.result;
-      if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
-        this.db.deleteObjectStore("exercises");
-      }
-      this.db.createObjectStore("exercises", {
-        keyPath: "name",
-      });
-      this.db.createObjectStore("exercise_logs", {
-        keyPath: ["date", "exerciseName"],
-      });
-    };
+      request.onupgradeneeded = (event) => {
+        console.log(
+          "onupgradeneeded",
+          "oldVersion:",
+          event.oldVersion,
+          "latest:",
+          this.VERSION
+        );
+        this.db = request.result;
+
+        if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
+          this.db.deleteObjectStore("exercises");
+        }
+        this.db.createObjectStore("exercises", {
+          keyPath: "name",
+        });
+        this.db.createObjectStore("exercise_logs", {
+          keyPath: ["date", "exerciseName"],
+        });
+
+        resolve(this._db);
+      };
+    });
   }
 
   private get db() {
