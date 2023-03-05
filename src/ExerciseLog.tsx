@@ -7,6 +7,7 @@ import {
   ListItem,
   ListItemIcon,
   Button,
+  IconButton,
 } from "@mui/material";
 import React from "react";
 import type { IExercise, ISet } from "./types";
@@ -42,6 +43,7 @@ export function ExerciseLog({ row }: { row: IExercise }) {
       sets: newSets,
     });
   }
+  const canAddRow = sets.length !== 0 && sets[sets.length - 1].reps !== 0;
 
   return (
     <Collapse in={true}>
@@ -56,12 +58,17 @@ export function ExerciseLog({ row }: { row: IExercise }) {
         }}
       >
         <ListItemIcon>
-          <AddIcon
-            color="primary"
+          <IconButton
             onClick={() => {
-              setSets([...sets, { setNumber: 1, weight: 0, reps: 0 }]);
+              setSets([
+                ...sets,
+                { setNumber: sets.length + 1, weight: 0, reps: 0 },
+              ]);
             }}
-          />
+            disabled={!canAddRow}
+          >
+            <AddIcon color={canAddRow ? "primary" : "disabled"} />
+          </IconButton>
         </ListItemIcon>
         <ListItemIcon>
           <Remove
@@ -109,7 +116,7 @@ function SetEntry({
         <TextField
           label="set"
           sx={{ m: 1, width: "10%" }}
-          value={1}
+          value={set.setNumber}
           disabled
           size="small"
         />
