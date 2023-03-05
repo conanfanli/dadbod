@@ -6,7 +6,6 @@ import {
   TextField,
   ListItem,
   ListItemIcon,
-  Button,
   IconButton,
 } from "@mui/material";
 import React from "react";
@@ -16,6 +15,7 @@ import { DbClient } from "./indexeddb/client";
 const today = new Date().toLocaleDateString();
 
 export function ExerciseLog({ row }: { row: IExercise }) {
+  console.log("render exercise log ...");
   const client = new DbClient();
 
   const [sets, setSets] = React.useState<ISet[]>([]);
