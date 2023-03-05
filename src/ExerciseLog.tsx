@@ -71,8 +71,8 @@ export function ExerciseLog({ row }: { row: IExercise }) {
           </IconButton>
         </ListItemIcon>
         <ListItemIcon>
-          <Remove
-            color="error"
+          <IconButton
+            disabled={!sets || sets.length === 0}
             onClick={() => {
               const newSets = sets.slice(0, sets.length - 1);
               setSets(newSets);
@@ -82,7 +82,9 @@ export function ExerciseLog({ row }: { row: IExercise }) {
                 sets: newSets,
               });
             }}
-          />
+          >
+            <Remove color={sets.length === 0 ? "disabled" : "error"} />
+          </IconButton>
         </ListItemIcon>
       </ListItem>
     </Collapse>
