@@ -12,43 +12,41 @@ import React from "react";
 import type { IExercise, ISet } from "./types";
 import { DbClient } from "./indexeddb/client";
 
-const today = new Date().toISOString().slice(0, 10);
+const today = new Date().toLocaleDateString();
 
-export function ExerciseLog({
-  row,
-}: // client,
-{
-  //client: DbClient;
-  row: IExercise;
-}) {
+export function ExerciseLog({ row }: { row: IExercise }) {
+  const client = new DbClient();
+
   const [sets, setSets] = React.useState<ISet[]>([]);
-  /*
+
   React.useEffect(() => {
-    client.listLogs((rows) => {
-      console.log(rows);
-      setSets(rows);
-    });
-  }); */
+    async function fetchData() {
+      const logs = await client.listLogs();
+      setSets(logs.find((log) => log.exerciseName === row.name)?.sets || []);
+    }
+    fetchData();
+  }, []);
+
+  const setsWithNewRow =
+    sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
 
   function putSet(newSet: ISet) {
     const newSets = setsWithNewRow.map((s, i) => {
       return i === newSet.setNumber - 1 ? newSet : s;
     });
     setSets(newSets);
-    /*
+
     client.logExercise({
       date: today,
       exerciseName: row.name,
       sets: newSets,
-    }); */
+    });
   }
 
-  const setsWithNewRow =
-    sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
   return (
     <Collapse in={true}>
       {setsWithNewRow.map((s, index) => {
-        return <SetEntry key={index} setNumber={index + 1} putSet={putSet} />;
+        return <SetEntry key={s.setNumber} set={s} putSet={putSet} />;
       })}
       <ListItem
         sx={{
@@ -69,7 +67,13 @@ export function ExerciseLog({
           <Remove
             color="error"
             onClick={() => {
-              setSets(sets.slice(0, sets.length - 1));
+              const newSets = sets.slice(0, sets.length - 1);
+              setSets(newSets);
+              client.logExercise({
+                date: today,
+                exerciseName: row.name,
+                sets: newSets,
+              });
             }}
           />
         </ListItemIcon>
@@ -79,26 +83,24 @@ export function ExerciseLog({
 }
 
 function SetEntry({
-  setNumber,
+  set,
   putSet,
 }: {
-  setNumber: number;
+  set: ISet;
   putSet: (newSet: ISet) => void;
 }) {
-  const [weight, setWeight] = React.useState(0);
-  const [reps, setReps] = React.useState(0);
-
   function onWeightChange(e) {
-    setWeight(Number(e.target.value));
-    if (reps) {
-      putSet({ setNumber, reps, weight: Number(e.target.value) });
-    }
+    const weight = Number(e.target.value);
+    putSet({
+      setNumber: set.setNumber,
+      reps: set.reps,
+      weight,
+    });
   }
   function onRepsChange(e) {
-    const value = Number(e.target.value);
-    setReps(value);
-    if (value) {
-      putSet({ setNumber, weight, reps: value });
+    const reps = Number(e.target.value);
+    if (reps) {
+      putSet({ setNumber: set.setNumber, weight: set.weight, reps });
     }
   }
   return (
@@ -113,7 +115,7 @@ function SetEntry({
         />
         <TextField
           label="Weight"
-          value={weight || ""}
+          value={set.weight || ""}
           onChange={onWeightChange}
           inputProps={{ inputMode: "numeric" }}
           size="small"
@@ -121,9 +123,9 @@ function SetEntry({
         />
         <TextField
           inputProps={{ inputMode: "numeric" }}
-          value={reps || ""}
+          value={set.reps || ""}
           label="Reps"
-          error={reps === 0}
+          error={set.reps === 0}
           sx={{ m: 1, width: "36%" }}
           onChange={onRepsChange}
           size="small"

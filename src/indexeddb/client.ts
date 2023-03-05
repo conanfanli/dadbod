@@ -1,4 +1,4 @@
-import { IExerciseLog } from "../types";
+import { IExercise, IExerciseLog } from "../types";
 
 export class DbClient {
   readonly DB_NAME = "workout-log";
@@ -56,38 +56,51 @@ export class DbClient {
     this._db = v;
   }
 
-  public logExercise(data: IExerciseLog) {
+  public async logExercise(data: IExerciseLog) {
+    await this.connect();
     const store = this.db
       .transaction("exercise_logs", "readwrite")
       .objectStore("exercise_logs");
     store.put(data);
   }
-  public listExercises(onSuccess) {
+
+  public async listExercises() {
+    await this.connect();
+
     const request = this.db
       .transaction("exercises")
       .objectStore("exercises")
       .getAll();
-    request.onsuccess = () => {
-      onSuccess(request.result);
-    };
+    return new Promise<Array<IExercise>>(
+      (resolve, reject) =>
+        (request.onsuccess = () => {
+          resolve(request.result);
+        })
+    );
   }
-  public listLogs(onSuccess) {
+  public async listLogs() {
+    await this.connect();
     const request = this.db
       .transaction("exercise_logs")
       .objectStore("exercise_logs")
       .getAll();
-    request.onsuccess = () => {
-      onSuccess(request.result);
-    };
+    return new Promise<Array<IExerciseLog>>((resolve, reject) => {
+      request.onsuccess = () => {
+        resolve(request.result);
+      };
+    });
   }
-  public addExercise(data: { name: string; description: string }) {
+  public async addExercise(data: { name: string; description: string }) {
+    await this.connect();
     const store = this.db
       .transaction("exercises", "readwrite")
       .objectStore("exercises");
     store.put(data);
   }
 
-  public deleteExercise(name: string, onSuccess: () => void) {
+  public async deleteExercise(name: string, onSuccess: () => void) {
+    await this.connect();
+
     const request = this.db
       .transaction("exercises", "readwrite")
       .objectStore("exercises")

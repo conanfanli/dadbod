@@ -10,21 +10,21 @@ import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
 import Delete from "@mui/icons-material/Delete";
 import { ExerciseLog } from "./ExerciseLog";
-import { IExercise } from "./types";
+import { IExercise, IExerciseLog } from "./types";
 
 export function Exercises() {
   const client = new DbClient();
   const [exercises, setExercises] = React.useState<Array<IExercise>>([]);
 
   React.useEffect(() => {
-    const connectDb = async () => {
-      await client.connect();
-      client.listExercises((rows) => setExercises(rows));
+    const fetchData = async () => {
+      const exercises = await client.listExercises();
+      setExercises(exercises);
     };
-    connectDb();
+    fetchData();
   }, []);
 
-  function deleteExercise(name: string) {
+  async function deleteExercise(name: string) {
     client.deleteExercise(name, () =>
       setExercises(exercises.filter((r) => r.name !== name))
     );
@@ -34,6 +34,7 @@ export function Exercises() {
       <AddExerciseForm
         onSubmit={(data) => {
           client.addExercise(data);
+          setExercises([...exercises, data]);
         }}
       />
       <ExerciseList exercises={exercises} deleteExercise={deleteExercise} />
@@ -50,8 +51,6 @@ function ExerciseList({
 }) {
   const [active, setActive] = React.useState("");
 
-  console.log("render exercises list");
-
   return (
     <List sx={{ width: "100%" }}>
       {exercises.map((row, index) => [
@@ -63,7 +62,7 @@ function ExerciseList({
             </IconButton>
           </ListItemButton>
         </ListItem>,
-        <ExerciseLog key={index} row={row} />,
+        active === row.name ? <ExerciseLog key={index} row={row} /> : null,
       ])}
     </List>
   );
