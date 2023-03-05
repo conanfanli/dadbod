@@ -1,3 +1,5 @@
+import { DbClient } from "../indexeddb/client";
+
 export class SheetClient {
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
   readonly DISCOVERY_DOC =
@@ -44,8 +46,12 @@ export class SheetClient {
       await gapi.client.init({
         apiKey: "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg",
         discoveryDocs: [self.DISCOVERY_DOC],
+        scope: self.SCOPES,
+        clientId:
+          "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
       });
     }
+    // gapi.auth2.getAuthInstance().isSignedIn.listen();
     gapi.load("client", initializeGapiClient);
   }
 
@@ -72,7 +78,7 @@ export class SheetClient {
     } else {
       // Skip display of account chooser and consent dialog for an existing session.
       console.log("live spreadsheet session");
-      this.tokenClient.requestAccessToken({ prompt: "" });
+      this.tokenClient.requestAccessToken({ prompt: "none" });
     }
   }
 
@@ -114,5 +120,24 @@ export class SheetClient {
       return;
     }
     return range.values;
+  }
+
+  public async saveState(sheetId: string, dbClient: DbClient) {
+    gapi.client.setToken(this.getToken() || null);
+    this.requestConsent((t) => {
+      console.log("callback", t);
+    });
+    console.log(this.tokenClient, gapi.client.getToken());
+
+    const response = await gapi.client.sheets.spreadsheets.values.append(
+      {
+        spreadsheetId: sheetId,
+        range: "B2",
+        valueInputOption: "RAW",
+      },
+      { values: [[2]] }
+    );
+    console.log("got resonse", response.result);
+    return response.result;
   }
 }
