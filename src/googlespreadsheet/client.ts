@@ -1,6 +1,6 @@
 import { DbClient } from "../indexeddb/client";
 
-let _sheet_client_singleton;
+let _sheet_client_singleton: SheetClient;
 declare var gisLoadPromise;
 declare var gapiLoadPromise;
 
@@ -132,7 +132,15 @@ class SheetClient {
         range: "A2:B9999",
       });
     } catch (err: any) {
-      return;
+      if (err.result.error.code === 401) {
+        await this.requestConsent();
+        response = await gapi.client.sheets.spreadsheets.values.get({
+          spreadsheetId: sheetId,
+          range: "A2:B9999",
+        });
+      } else {
+        return;
+      }
     }
     const range = response.result;
     if (!range || !range.values || range.values.length === 0) {
@@ -141,7 +149,7 @@ class SheetClient {
     return range.values;
   }
 
-  public async saveState(sheetId: string, dbClient: DbClient) {
+  public async saveState(sheetId: string, jsonState: string) {
     this.getToken();
 
     console.log(this.tokenClient, gapi.client.getToken());
@@ -149,10 +157,13 @@ class SheetClient {
     const response = await gapi.client.sheets.spreadsheets.values.append(
       {
         spreadsheetId: sheetId,
-        range: "B2",
-        valueInputOption: "RAW",
+        range: "Sheet1!A2:B2",
+        valueInputOption: "USER_ENTERED",
       },
-      { values: [[2]] }
+      {
+        majorDimension: "ROWS",
+        values: [[new Date().toISOString(), jsonState]],
+      }
     );
     console.log("got resonse", response.result);
     return response.result;

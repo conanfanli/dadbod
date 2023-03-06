@@ -57,6 +57,12 @@ export class DbClient {
     this._db = v;
   }
 
+  public async getState() {
+    const exercises = await this.listExercises();
+    const logs = await this.listLogs();
+    return { exercises, logs };
+  }
+
   public async logExercise(data: IExerciseLog) {
     await this.connect();
     const store = this.db

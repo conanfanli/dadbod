@@ -57,7 +57,10 @@ export function Authorize() {
         onClick={async () => {
           const dbClient = new DbClient();
           await dbClient.connect();
-          await client.saveState(sheetId, dbClient);
+          await client.saveState(
+            sheetId,
+            JSON.stringify(await dbClient.getState())
+          );
         }}
         disabled={!hasConsent || !sheetId}
       >

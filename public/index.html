@@ -27,6 +27,7 @@
     <title>React App</title>
   </head>
   <body>
+   
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--
@@ -40,36 +41,17 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
     <script>
-    const gapiLoadPromise = new Promise((resolve, reject) => {
-      gapiLoadOkay = resolve;
-      gapiLoadFail = reject;
-    });
-    const gisLoadPromise = new Promise((resolve, reject) => {
-      gisLoadOkay = resolve;
-      gisLoadFail = reject;
-    });
-  </script>
+      const gapiLoadPromise = new Promise((resolve, reject) => {
+        gapiLoadOkay = resolve;
+        gapiLoadFail = reject;
+      });
+      const gisLoadPromise = new Promise((resolve, reject) => {
+        gisLoadOkay = resolve;
+        gisLoadFail = reject;
+      });
+    </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoadOkay()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoadOkay()"></script>
-    <script>
-      
-
-      function handleCredentialResponse(response) {
-        console.log("Encoded JWT ID token: " + response.credential);
-      }
-      window.onload = function () {
-        google.accounts.id.initialize({
-          client_id: "405611184091-qr0f2pe92cmb6089o86v2dovkgqgrc93.apps.googleusercontent.com",
-          callback: handleCredentialResponse
-        });
-        google.accounts.id.renderButton(
-          document.getElementById("buttonDiv"),
-          { theme: "outline", size: "large" }  // customization attributes
-        );
-        google.accounts.id.prompt(); // also display the One Tap dialog
-      }
-  </script>
-  <div id="buttonDiv"></div> 
 </div>
   </body>
 </html>
