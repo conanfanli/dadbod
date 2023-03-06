@@ -2,6 +2,7 @@ import { DbClient } from "../indexeddb/client";
 
 export class SheetClient {
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
+  readonly API_KEY = "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg";
   readonly DISCOVERY_DOC =
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
   private tokenClient?: google.accounts.oauth2.TokenClient;
@@ -26,23 +27,44 @@ export class SheetClient {
     return this.token;
   }
 
-  public initialize() {
+  public async authenticate() {
     if (this.tokenClient) {
       return;
     }
 
     const self = this;
 
-    async function initializeGapiClient() {
-      await gapi.client.init({});
-    }
-    // gapi.auth2.getAuthInstance().isSignedIn.listen();
-    gapi.load("client", initializeGapiClient);
+    const loadGapi = new Promise<void>((resolve, reject) => {
+      async function initializeGapiClient() {
+        await gapi.client.init({
+          apiKey: self.API_KEY,
+          discoveryDocs: [self.DISCOVERY_DOC],
+        });
+        console.log("set up gapi client");
+        resolve();
+      }
+      // gapi.auth2.getAuthInstance().isSignedIn.listen();
+      gapi.load("client", initializeGapiClient);
+    });
+
+    await loadGapi;
+
+    console.log("52", gapi.client.getToken());
+    this.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id:
+        "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
+      scope: this.SCOPES,
+      // Will be called after requestAccessToken
+      callback: (token) => {
+        console.log("token client setup", token);
+      },
+    });
   }
 
   public requestConsent(callback) {
+    /*
     const self = this;
-    this.initialize();
+    this.authenticate();
     this.tokenClient = google.accounts.oauth2.initTokenClient({
       client_id:
         "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
@@ -51,7 +73,7 @@ export class SheetClient {
         callback(token);
         self.saveToken(token);
       },
-    });
+    });*/
     if (!this.tokenClient) {
       throw new Error("failed to init token client");
     }
@@ -109,6 +131,7 @@ export class SheetClient {
 
   public async saveState(sheetId: string, dbClient: DbClient) {
     gapi.client.setToken(this.getToken() || null);
+
     this.requestConsent((t) => {
       console.log("callback", t);
     });

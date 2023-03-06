@@ -8,17 +8,27 @@ const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 
 export function Authorize() {
   console.log("Render authorize");
-  let client: SheetClient;
+
+  const client = new SheetClient();
+
   const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(defaultSheetId);
   const [sheetName, setSheetName] = React.useState("");
   const [rows, setRows] = React.useState([]);
 
   React.useEffect(() => {
-    client = new SheetClient();
-    client.initialize();
-    setHasConsent(!!client.getToken());
-  });
+    console.log("1");
+
+    async function authenticate() {
+      await client.authenticate();
+      console.log("112323");
+
+      setHasConsent(!!client.getToken());
+      console.log("23", client.getToken());
+    }
+
+    authenticate();
+  }, []);
 
   return (
     <div>
@@ -37,7 +47,7 @@ export function Authorize() {
       <Button
         variant="contained"
         onClick={() => {
-          SheetClient.getInstance().requestConsent(() => {
+          client.requestConsent(() => {
             setHasConsent(!!client.getToken());
           });
         }}
