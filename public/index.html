@@ -39,10 +39,21 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-
-    <script async defer src="https://apis.google.com/js/api.js"></script>
-    <script async defer src="https://accounts.google.com/gsi/client"></script>
     <script>
+    const gapiLoadPromise = new Promise((resolve, reject) => {
+      gapiLoadOkay = resolve;
+      gapiLoadFail = reject;
+    });
+    const gisLoadPromise = new Promise((resolve, reject) => {
+      gisLoadOkay = resolve;
+      gisLoadFail = reject;
+    });
+  </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoadOkay()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoadOkay()"></script>
+    <script>
+      
+
       function handleCredentialResponse(response) {
         console.log("Encoded JWT ID token: " + response.credential);
       }

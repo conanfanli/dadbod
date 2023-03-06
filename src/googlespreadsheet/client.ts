@@ -1,36 +1,67 @@
 import { DbClient } from "../indexeddb/client";
 
-export class SheetClient {
+let _sheet_client_singleton;
+declare var gisLoadPromise;
+declare var gapiLoadPromise;
+
+export function getSheetClient() {
+  if (!_sheet_client_singleton) {
+    console.log("first time setup up sheet client");
+    _sheet_client_singleton = new SheetClient();
+  }
+  return _sheet_client_singleton;
+}
+
+class SheetClient {
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
   readonly API_KEY = "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg";
   readonly DISCOVERY_DOC =
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
   private tokenClient?: google.accounts.oauth2.TokenClient;
 
-  private token?: GoogleApiOAuth2TokenObject;
-
-  public saveToken(token: GoogleApiOAuth2TokenObject) {
+  public setToken(token: GoogleApiOAuth2TokenObject) {
     localStorage.setItem("spreadsheet_token", JSON.stringify(token));
-    this.token = token;
+    gapi.client.setToken(token);
   }
 
   public getToken() {
-    if (this.token) {
-      return this.token;
+    const tokenFromLocalStorage = localStorage.getItem("spreadsheet_token");
+    if (!gapi || !gapi.client) {
+      return tokenFromLocalStorage;
     }
 
-    const stored = localStorage.getItem("spreadsheet_token");
-    if (stored) {
-      this.token = JSON.parse(stored);
+    if (!gapi.client.getToken() && tokenFromLocalStorage) {
+      console.log("using token from local storage");
+      gapi.client.setToken(JSON.parse(tokenFromLocalStorage));
+      return tokenFromLocalStorage;
     }
 
-    return this.token;
+    if (gapi.client.getToken() && !tokenFromLocalStorage) {
+      localStorage.setItem(
+        "spreadsheet_token",
+        JSON.stringify(gapi.client.getToken())
+      );
+      console.log("using token from gapi");
+      return gapi.client.getToken();
+    }
+    return tokenFromLocalStorage;
   }
 
   public async authenticate() {
+    await gisLoadPromise;
+    await gapiLoadPromise;
     if (this.tokenClient) {
       return;
     }
+    this.tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id:
+        "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
+      scope: this.SCOPES,
+      // Will be called after requestAccessToken
+      callback: (token) => {
+        this.setToken(token);
+      },
+    });
 
     const self = this;
 
@@ -41,56 +72,37 @@ export class SheetClient {
           discoveryDocs: [self.DISCOVERY_DOC],
         });
         console.log("set up gapi client");
+        self.getToken();
+
         resolve();
       }
-      // gapi.auth2.getAuthInstance().isSignedIn.listen();
       gapi.load("client", initializeGapiClient);
     });
 
     await loadGapi;
+  }
 
-    console.log("52", gapi.client.getToken());
-    this.tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id:
-        "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
-      scope: this.SCOPES,
-      // Will be called after requestAccessToken
-      callback: (token) => {
-        console.log("token client setup", token);
-      },
+  public async requestConsent() {
+    return new Promise<void>((resolve, reject) => {
+      if (!this.tokenClient) {
+        throw new Error("failed to init token client");
+      }
+      (this.tokenClient as any).callback = (token) => {
+        this.setToken(token);
+        console.log("consent obtained");
+        resolve();
+      };
+
+      if (!this.getToken()) {
+        // Prompt the user to select a Google Account and ask for consent to share their data
+        // when establishing a new session.
+        this.tokenClient.requestAccessToken({ prompt: "none" });
+      } else {
+        // Skip display of account chooser and consent dialog for an existing session.
+        console.log("live spreadsheet session");
+        this.tokenClient.requestAccessToken({ prompt: "none" });
+      }
     });
-  }
-
-  public requestConsent(callback) {
-    /*
-    const self = this;
-    this.authenticate();
-    this.tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id:
-        "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
-      scope: this.SCOPES,
-      callback: (token) => {
-        callback(token);
-        self.saveToken(token);
-      },
-    });*/
-    if (!this.tokenClient) {
-      throw new Error("failed to init token client");
-    }
-
-    if (gapi.client.getToken() === null) {
-      // Prompt the user to select a Google Account and ask for consent to share their data
-      // when establishing a new session.
-      this.tokenClient.requestAccessToken({ prompt: "consent" });
-    } else {
-      // Skip display of account chooser and consent dialog for an existing session.
-      console.log("live spreadsheet session");
-      this.tokenClient.requestAccessToken({ prompt: "none" });
-    }
-  }
-
-  public hasConsent() {
-    return gapi.client.getToken() !== null;
   }
 
   public async getName(sheetId: string) {
@@ -130,11 +142,8 @@ export class SheetClient {
   }
 
   public async saveState(sheetId: string, dbClient: DbClient) {
-    gapi.client.setToken(this.getToken() || null);
+    this.getToken();
 
-    this.requestConsent((t) => {
-      console.log("callback", t);
-    });
     console.log(this.tokenClient, gapi.client.getToken());
 
     const response = await gapi.client.sheets.spreadsheets.values.append(
