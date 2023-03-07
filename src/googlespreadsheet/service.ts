@@ -1,15 +1,16 @@
 import { SheetClient, ISheetClient } from "./client";
 
 interface ISheetService {
-  addRow(
+  saveState(
     sheetId: string,
-    row: Array<string>
+    jsonState: string
   ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
 
   getRows(sheeId: string): Promise<[string, string][] | null>;
   getSheetName(sheetId: string): Promise<string>;
 
   promptConcent(): Promise<void>;
+  hasConsent(): Promise<boolean>;
 }
 
 export class SheetService implements ISheetService {
@@ -21,6 +22,11 @@ export class SheetService implements ISheetService {
 
   constructor() {
     this.client = new SheetClient();
+  }
+
+  public async hasConsent() {
+    await this.client.connect();
+    return !!this.client.getToken();
   }
 
   private async _handle401<T>(apiPromise: Promise<T>): Promise<T> {
@@ -35,8 +41,10 @@ export class SheetService implements ISheetService {
       throw err;
     }
   }
-  public async addRow(sheetId: string, row: Array<string>) {
-    return this._handle401(this.client.addRow(sheetId, row));
+  public async saveState(sheetId: string, jsonState: string) {
+    return this._handle401(
+      this.client.addRow(sheetId, [new Date().toISOString(), jsonState])
+    );
   }
 
   public async getSheetName(sheetId: string): Promise<string> {

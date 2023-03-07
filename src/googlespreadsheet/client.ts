@@ -1,4 +1,3 @@
-let _sheet_client_singleton: SheetClient;
 declare var gisLoadPromise;
 declare var gapiLoadPromise;
 
@@ -7,18 +6,11 @@ export interface ISheetClient {
     sheetId: string,
     row: Array<string>
   ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
-  authenticate(): Promise<void>;
+  connect(): Promise<void>;
   getSheetName(sheetId: string): Promise<string>;
   promptConcent(): Promise<void>;
   getRows(sheeId: string): Promise<[string, string][] | null>;
-}
-
-export function getSheetClient() {
-  if (!_sheet_client_singleton) {
-    console.log("first time setup up sheet client");
-    _sheet_client_singleton = new SheetClient();
-  }
-  return _sheet_client_singleton;
+  getToken(): GoogleApiOAuth2TokenObject | null;
 }
 
 export class SheetClient implements ISheetClient {
@@ -43,7 +35,7 @@ export class SheetClient implements ISheetClient {
     return response.result;
   }
 
-  public setToken(token: GoogleApiOAuth2TokenObject) {
+  private _setToken(token: GoogleApiOAuth2TokenObject) {
     localStorage.setItem("spreadsheet_token", JSON.stringify(token));
     gapi.client.setToken(token);
   }
@@ -51,13 +43,13 @@ export class SheetClient implements ISheetClient {
   public getToken() {
     const tokenFromLocalStorage = localStorage.getItem("spreadsheet_token");
     if (!gapi || !gapi.client) {
-      return tokenFromLocalStorage;
+      return null;
     }
 
     if (!gapi.client.getToken() && tokenFromLocalStorage) {
       console.log("using token from local storage");
       gapi.client.setToken(JSON.parse(tokenFromLocalStorage));
-      return tokenFromLocalStorage;
+      return JSON.parse(tokenFromLocalStorage);
     }
 
     if (gapi.client.getToken() && !tokenFromLocalStorage) {
@@ -68,10 +60,10 @@ export class SheetClient implements ISheetClient {
       console.log("using token from gapi");
       return gapi.client.getToken();
     }
-    return tokenFromLocalStorage;
+    return tokenFromLocalStorage ? JSON.parse(tokenFromLocalStorage) : null;
   }
 
-  public async authenticate() {
+  public async connect() {
     await gisLoadPromise;
     await gapiLoadPromise;
     if (this.tokenClient) {
@@ -83,7 +75,7 @@ export class SheetClient implements ISheetClient {
       scope: this.SCOPES,
       // Will be called after requestAccessToken
       callback: (token) => {
-        this.setToken(token);
+        this._setToken(token);
       },
     });
 
@@ -112,7 +104,7 @@ export class SheetClient implements ISheetClient {
         throw new Error("failed to init token client");
       }
       (this.tokenClient as any).callback = (token) => {
-        this.setToken(token);
+        this._setToken(token);
         console.log("consent obtained");
         resolve();
       };

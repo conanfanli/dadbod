@@ -1,6 +1,5 @@
 import * as React from "react";
 import { TextField, Button } from "@mui/material";
-import { getSheetClient } from "./client";
 import { StateTable } from "./StateTable";
 import { DbClient } from "../indexeddb/client";
 import { getSheetService } from "./service";
@@ -10,7 +9,6 @@ const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 export function Authorize() {
   console.log("Render authorize");
 
-  const client = getSheetClient();
   const sheetService = getSheetService();
 
   const [hasConsent, setHasConsent] = React.useState(false);
@@ -20,9 +18,7 @@ export function Authorize() {
 
   React.useEffect(() => {
     async function authenticate() {
-      await client.authenticate();
-
-      setHasConsent(!!client.getToken());
+      setHasConsent(await sheetService.hasConsent());
     }
 
     authenticate();
@@ -46,7 +42,7 @@ export function Authorize() {
         variant="contained"
         onClick={async () => {
           await sheetService.promptConcent();
-          setHasConsent(!!client.getToken());
+          setHasConsent(await sheetService.hasConsent());
         }}
         fullWidth
         disabled={hasConsent}
@@ -59,7 +55,7 @@ export function Authorize() {
         onClick={async () => {
           const dbClient = new DbClient();
           await dbClient.connect();
-          await client.saveState(
+          await sheetService.saveState(
             sheetId,
             JSON.stringify(await dbClient.getState())
           );
