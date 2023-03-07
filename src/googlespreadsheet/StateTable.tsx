@@ -8,7 +8,7 @@ import {
   TableHead,
 } from "@mui/material";
 
-export function StateTable(props: { rows: Array<[string, string]> }) {
+export function StateTable(props: { rows: [string, string][] }) {
   const { rows } = props;
   return (
     <TableContainer>

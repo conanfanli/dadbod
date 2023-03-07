@@ -16,7 +16,7 @@ export function Authorize() {
   const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(defaultSheetId);
   const [sheetName, setSheetName] = React.useState("");
-  const [rows, setRows] = React.useState([]);
+  const [rows, setRows] = React.useState<[string, string][]>([]);
 
   React.useEffect(() => {
     async function authenticate() {
@@ -45,7 +45,7 @@ export function Authorize() {
       <Button
         variant="contained"
         onClick={async () => {
-          await client.requestConsent();
+          await sheetService.promptConcent();
           setHasConsent(!!client.getToken());
         }}
         fullWidth
@@ -73,8 +73,8 @@ export function Authorize() {
         fullWidth
         onClick={async () => {
           setSheetName(await sheetService.getSheetName(sheetId));
-          // const rows = await client.getRows(sheetId);
-          // setRows(rows);
+          const rows = (await sheetService.getRows(sheetId)) || [];
+          setRows(rows);
         }}
         disabled={!hasConsent || !sheetId}
       >

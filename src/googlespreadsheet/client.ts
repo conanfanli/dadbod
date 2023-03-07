@@ -7,9 +7,10 @@ export interface ISheetClient {
     sheetId: string,
     row: Array<string>
   ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
-  requestConsent(): Promise<void>;
   authenticate(): Promise<void>;
   getSheetName(sheetId: string): Promise<string>;
+  promptConcent(): Promise<void>;
+  getRows(sheeId: string): Promise<[string, string][] | null>;
 }
 
 export function getSheetClient() {
@@ -105,7 +106,7 @@ export class SheetClient implements ISheetClient {
     await loadGapi;
   }
 
-  public async requestConsent() {
+  public async promptConcent() {
     return new Promise<void>((resolve, reject) => {
       if (!this.tokenClient) {
         throw new Error("failed to init token client");
@@ -136,29 +137,15 @@ export class SheetClient implements ISheetClient {
   }
 
   public async getRows(sheetId: string) {
-    let response;
-    try {
-      // Fetch first 10 files
-      response = await gapi.client.sheets.spreadsheets.values.get({
-        spreadsheetId: sheetId,
-        range: "A2:B9999",
-      });
-    } catch (err: any) {
-      if (err.result.error.code === 401) {
-        await this.requestConsent();
-        response = await gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: sheetId,
-          range: "A2:B9999",
-        });
-      } else {
-        return;
-      }
-    }
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "A2:B9999",
+    });
     const range = response.result;
     if (!range || !range.values || range.values.length === 0) {
-      return;
+      return null;
     }
-    return range.values;
+    return range.values as [string, string][];
   }
 
   public async saveState(sheetId: string, jsonState: string) {
