@@ -64,25 +64,47 @@ export class SheetClient implements ISheetClient {
   }
 
   public async connect() {
-    console.log("call connect");
-    await gisLoadPromise;
+    const self = this;
     await gapiLoadPromise;
-    console.log("script loaded");
     if (this.tokenClient) {
       return;
     }
-    this.tokenClient = google.accounts.oauth2.initTokenClient({
-      client_id:
-        "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
-      scope: this.SCOPES,
-      // Will be called after requestAccessToken
-      callback: (token) => {
-        this._setToken(token);
-      },
+
+    await new Promise<void>((resolve, reject) => {
+      gapi.load("client", {
+        callback: () => {
+          console.log("gapi loaded");
+          resolve();
+        },
+        onerror: reject,
+      });
+    });
+    await gapi.client.init({
+      apiKey: self.API_KEY,
+      discoveryDocs: [self.DISCOVERY_DOC],
+    });
+    console.log("gapi client inited");
+
+    await gisLoadPromise;
+
+    await new Promise<void>((resolve, reject) => {
+      try {
+        this.tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id:
+            "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
+          scope: this.SCOPES,
+          // Will be called after requestAccessToken
+          callback: (token) => {
+            this._setToken(token);
+          },
+        });
+        resolve();
+      } catch (err) {
+        reject(err);
+      }
     });
 
-    const self = this;
-
+    /*
     const loadGapi = new Promise<void>((resolve, reject) => {
       console.log("init gapi");
       async function initializeGapiClient() {
@@ -97,8 +119,9 @@ export class SheetClient implements ISheetClient {
       }
       gapi.load("client", initializeGapiClient);
     });
+    */
 
-    await loadGapi;
+    // await loadGapi;
   }
 
   public async promptConcent() {

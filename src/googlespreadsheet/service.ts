@@ -62,6 +62,7 @@ let _sheetService: ISheetService;
 
 export function getSheetService() {
   if (!_sheetService) {
+    console.log("sheet service inited");
     _sheetService = new SheetService();
   }
 
