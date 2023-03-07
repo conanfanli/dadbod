@@ -16,6 +16,6 @@ jobs:
       - run: pnpm i
       - run: make lint
       - run: pnpm build
-      - uses: actions/upload-pages-artifact
+      - uses: actions/upload-pages-artifact@v1
         with:
           path: "./build"
