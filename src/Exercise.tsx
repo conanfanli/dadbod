@@ -10,10 +10,10 @@ import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
 import Delete from "@mui/icons-material/Delete";
 import { ExerciseLog } from "./ExerciseLog";
-import { IExercise, IExerciseLog } from "./types";
+import { IExercise } from "./types";
 
 export function Exercises() {
-  const client = new DbClient();
+  const client = React.useMemo(() => new DbClient(), []);
   const [exercises, setExercises] = React.useState<Array<IExercise>>([]);
 
   React.useEffect(() => {
@@ -22,7 +22,7 @@ export function Exercises() {
       setExercises(exercises);
     };
     fetchData();
-  }, []);
+  }, [client]);
 
   async function deleteExercise(name: string) {
     client.deleteExercise(name, () =>

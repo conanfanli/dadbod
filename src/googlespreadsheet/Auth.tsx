@@ -1,30 +1,29 @@
 import * as React from "react";
 import { TextField, Button } from "@mui/material";
-import { getSheetClient } from "./client";
 import { StateTable } from "./StateTable";
 import { DbClient } from "../indexeddb/client";
+import { getSheetService } from "./service";
 
 const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 
 export function Authorize() {
   console.log("Render authorize");
 
-  const client = getSheetClient();
+  const sheetService = React.useMemo(() => getSheetService(), []);
 
   const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(defaultSheetId);
   const [sheetName, setSheetName] = React.useState("");
-  const [rows, setRows] = React.useState([]);
+  const [rows, setRows] = React.useState<[string, string][]>([]);
 
   React.useEffect(() => {
     async function authenticate() {
-      await client.authenticate();
-
-      setHasConsent(!!client.getToken());
+      setHasConsent(await sheetService.hasConsent());
+      setSheetName(await sheetService.getSheetName(sheetId));
     }
 
     authenticate();
-  }, []);
+  }, [sheetId, sheetService]);
 
   return (
     <div>
@@ -43,8 +42,8 @@ export function Authorize() {
       <Button
         variant="contained"
         onClick={async () => {
-          await client.requestConsent();
-          setHasConsent(!!client.getToken());
+          await sheetService.promptConcent();
+          setHasConsent(await sheetService.hasConsent());
         }}
         fullWidth
         disabled={hasConsent}
@@ -57,7 +56,7 @@ export function Authorize() {
         onClick={async () => {
           const dbClient = new DbClient();
           await dbClient.connect();
-          await client.saveState(
+          await sheetService.saveState(
             sheetId,
             JSON.stringify(await dbClient.getState())
           );
@@ -70,9 +69,8 @@ export function Authorize() {
         variant="contained"
         fullWidth
         onClick={async () => {
-          const info = await client.getName(sheetId);
-          setSheetName(info?.properties?.title || "");
-          const rows = await client.getRows(sheetId);
+          setSheetName(await sheetService.getSheetName(sheetId));
+          const rows = (await sheetService.getRows(sheetId)) || [];
           setRows(rows);
         }}
         disabled={!hasConsent || !sheetId}
