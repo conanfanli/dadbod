@@ -1,5 +1,6 @@
 {
   "name": "workout-log",
+  "homepage": "workout-log",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
