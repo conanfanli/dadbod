@@ -16,7 +16,7 @@ const today = new Date().toLocaleDateString();
 
 export function ExerciseLog({ row }: { row: IExercise }) {
   console.log("render exercise log ...");
-  const client = new DbClient();
+  const client = React.useMemo(() => new DbClient(), []);
 
   const [sets, setSets] = React.useState<ISet[]>([]);
 
@@ -26,7 +26,7 @@ export function ExerciseLog({ row }: { row: IExercise }) {
       setSets(logs.find((log) => log.exerciseName === row.name)?.sets || []);
     }
     fetchData();
-  }, []);
+  }, [client, row.name]);
 
   const setsWithNewRow =
     sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
