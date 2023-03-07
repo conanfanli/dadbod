@@ -77,7 +77,7 @@ export function Authorize() {
         }}
         disabled={!hasConsent || !sheetId}
       >
-        List Majors
+        List Rows
       </Button>
       <StateTable rows={rows} />
     </div>
