@@ -150,8 +150,6 @@ class SheetClient {
   public async saveState(sheetId: string, jsonState: string) {
     this.getToken();
 
-    console.log(this.tokenClient, gapi.client.getToken());
-
     const response = await gapi.client.sheets.spreadsheets.values.append(
       {
         spreadsheetId: sheetId,
