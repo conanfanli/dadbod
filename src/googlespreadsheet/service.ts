@@ -30,9 +30,11 @@ export class SheetService implements ISheetService {
   }
 
   private async _handle401<T>(apiPromise: Promise<T>): Promise<T> {
+    await this.client.connect();
     try {
       return await apiPromise;
     } catch (err: any) {
+      console.log(222, err);
       if (err.result.error.code === 401) {
         await this.client.promptConcent();
         return await apiPromise;

@@ -19,6 +19,7 @@ export function Authorize() {
   React.useEffect(() => {
     async function authenticate() {
       setHasConsent(await sheetService.hasConsent());
+      setSheetName(await sheetService.getSheetName(sheetId));
     }
 
     authenticate();

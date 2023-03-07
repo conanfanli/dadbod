@@ -64,8 +64,10 @@ export class SheetClient implements ISheetClient {
   }
 
   public async connect() {
+    console.log("call connect");
     await gisLoadPromise;
     await gapiLoadPromise;
+    console.log("script loaded");
     if (this.tokenClient) {
       return;
     }
@@ -82,6 +84,7 @@ export class SheetClient implements ISheetClient {
     const self = this;
 
     const loadGapi = new Promise<void>((resolve, reject) => {
+      console.log("init gapi");
       async function initializeGapiClient() {
         await gapi.client.init({
           apiKey: self.API_KEY,
