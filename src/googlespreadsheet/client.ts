@@ -1,5 +1,3 @@
-import { DbClient } from "../indexeddb/client";
-
 let _sheet_client_singleton: SheetClient;
 declare var gisLoadPromise;
 declare var gapiLoadPromise;
