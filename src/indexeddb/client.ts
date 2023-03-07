@@ -15,7 +15,6 @@ export class DbClient {
       };
       request.onsuccess = (event) => {
         this._db = (event as any).target.result;
-        console.log("connected db");
         resolve(this._db);
       };
 
