@@ -15,6 +15,7 @@ export class DbClient {
       };
       request.onsuccess = (event) => {
         this._db = (event as any).target.result;
+        console.log("connected db");
         resolve(this._db);
       };
 
@@ -54,6 +55,12 @@ export class DbClient {
       throw new Error("Cannot set db");
     }
     this._db = v;
+  }
+
+  public async getState() {
+    const exercises = await this.listExercises();
+    const logs = await this.listLogs();
+    return { exercises, logs };
   }
 
   public async logExercise(data: IExerciseLog) {

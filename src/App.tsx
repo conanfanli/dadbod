@@ -12,14 +12,15 @@ const router = createBrowserRouter([
         <Button fullWidth href="/spreadsheet/authorize">
           Spreadsheet
         </Button>
-        <Button fullWidth href="/exercise">
+        <Button fullWidth href="/exercises">
           Exercises
         </Button>
       </div>
     ),
   },
+
   {
-    path: "/exercise",
+    path: "/exercises",
     element: <Exercises />,
   },
   {

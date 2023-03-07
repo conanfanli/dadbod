@@ -64,3 +64,10 @@ Same as Wednesday but may swap deadlifts for squats.
 Can swap back with shoulder exercises
 
 ### Sunday rest/walk
+
+
+## Google API references
+
+There are 2 authorization flows. One is implicit flow and the other is authorization code flow which requests for refresh token.
+
+Migrating to new auth using implicit flow: https://developers.google.com/identity/oauth2/web/guides/migration-to-gis#gapi-asyncawait

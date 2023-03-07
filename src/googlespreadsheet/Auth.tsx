@@ -1,22 +1,30 @@
 import * as React from "react";
 import { TextField, Button } from "@mui/material";
-import { SheetClient } from "./client";
+import { getSheetClient } from "./client";
 import { StateTable } from "./StateTable";
+import { DbClient } from "../indexeddb/client";
 
 const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 
 export function Authorize() {
-  let client: SheetClient;
+  console.log("Render authorize");
+
+  const client = getSheetClient();
+
   const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(defaultSheetId);
   const [sheetName, setSheetName] = React.useState("");
   const [rows, setRows] = React.useState([]);
 
   React.useEffect(() => {
-    client = new SheetClient();
-    client.initialize();
-    setHasConsent(!!client.getToken());
-  });
+    async function authenticate() {
+      await client.authenticate();
+
+      setHasConsent(!!client.getToken());
+    }
+
+    authenticate();
+  }, []);
 
   return (
     <div>
@@ -34,15 +42,29 @@ export function Authorize() {
       />
       <Button
         variant="contained"
-        onClick={() => {
-          SheetClient.getInstance().requestConsent(() => {
-            setHasConsent(!!client.getToken());
-          });
+        onClick={async () => {
+          await client.requestConsent();
+          setHasConsent(!!client.getToken());
         }}
         fullWidth
         disabled={hasConsent}
       >
         Authorize
+      </Button>
+      <Button
+        variant="contained"
+        fullWidth
+        onClick={async () => {
+          const dbClient = new DbClient();
+          await dbClient.connect();
+          await client.saveState(
+            sheetId,
+            JSON.stringify(await dbClient.getState())
+          );
+        }}
+        disabled={!hasConsent || !sheetId}
+      >
+        Save State
       </Button>
       <Button
         variant="contained"
@@ -55,7 +77,7 @@ export function Authorize() {
         }}
         disabled={!hasConsent || !sheetId}
       >
-        List Majors
+        List Rows
       </Button>
       <StateTable rows={rows} />
     </div>

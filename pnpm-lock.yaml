@@ -9,6 +9,7 @@ specifiers:
   '@testing-library/react': ^13.4.0
   '@testing-library/user-event': ^13.5.0
   '@types/gapi': ^0.0.44
+  '@types/gapi.auth2': ^0.0.57
   '@types/gapi.client.sheets': ^4.0.20201031
   '@types/google.accounts': ^0.0.6
   '@types/jest': ^27.5.2
@@ -44,6 +45,7 @@ dependencies:
 
 devDependencies:
   '@types/gapi': 0.0.44
+  '@types/gapi.auth2': 0.0.57
   '@types/gapi.client.sheets': 4.0.20201031
   '@types/google.accounts': 0.0.6
   '@types/testing-library__jest-dom': 5.14.5
@@ -2667,6 +2669,12 @@ packages:
       '@types/qs': 6.9.7
       '@types/serve-static': 1.15.0
     dev: false
+
+  /@types/gapi.auth2/0.0.57:
+    resolution: {integrity: sha512-2nYF2OZlEqWvF5rLk0nrQlAkk51Abe9zLHvA85NZqpIauYT/TluDNsPWkncI969BR/Ts5mdKrXgiWE/f4N6mMQ==}
+    dependencies:
+      '@types/gapi': 0.0.44
+    dev: true
 
   /@types/gapi.client.discovery/1.0.9:
     resolution: {integrity: sha512-51fXpt7DM7+zPG5pgwnNr3KaRXmyszznu66VPpV7+FAu0LGtpTohvdfvkRCnCn2Z6EgNTq/baFAtCa/9ylHOug==}
