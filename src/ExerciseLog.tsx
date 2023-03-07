@@ -47,7 +47,7 @@ export function ExerciseLog({ row }: { row: IExercise }) {
 
   return (
     <Collapse in={true}>
-      {setsWithNewRow.map((s, index) => {
+      {setsWithNewRow.map((s) => {
         return <SetEntry key={s.setNumber} set={s} putSet={putSet} />;
       })}
       <ListItem

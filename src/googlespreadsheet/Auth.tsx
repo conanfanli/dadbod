@@ -9,7 +9,7 @@ const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 export function Authorize() {
   console.log("Render authorize");
 
-  const sheetService = getSheetService();
+  const sheetService = React.useMemo(() => getSheetService(), []);
 
   const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(defaultSheetId);
@@ -23,7 +23,7 @@ export function Authorize() {
     }
 
     authenticate();
-  }, []);
+  }, [sheetId, sheetService]);
 
   return (
     <div>
