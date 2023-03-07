@@ -15,3 +15,7 @@ jobs:
       - run: npm install -g pnpm
       - run: pnpm i
       - run: make lint
+      - run: pnpm build
+      - uses: actions/upload-pages-artifact
+        with:
+          path: "./build"
