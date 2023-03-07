@@ -3,6 +3,7 @@ import { TextField, Button } from "@mui/material";
 import { getSheetClient } from "./client";
 import { StateTable } from "./StateTable";
 import { DbClient } from "../indexeddb/client";
+import { getSheetService } from "./service";
 
 const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 
@@ -10,6 +11,7 @@ export function Authorize() {
   console.log("Render authorize");
 
   const client = getSheetClient();
+  const sheetService = getSheetService();
 
   const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(defaultSheetId);
@@ -70,10 +72,9 @@ export function Authorize() {
         variant="contained"
         fullWidth
         onClick={async () => {
-          const info = await client.getName(sheetId);
-          setSheetName(info?.properties?.title || "");
-          const rows = await client.getRows(sheetId);
-          setRows(rows);
+          setSheetName(await sheetService.getSheetName(sheetId));
+          // const rows = await client.getRows(sheetId);
+          // setRows(rows);
         }}
         disabled={!hasConsent || !sheetId}
       >

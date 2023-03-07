@@ -1,23 +1,49 @@
+import { SheetClient, ISheetClient } from "./client";
+
 interface ISheetService {
-  addRow(row: Array<string>): Promise<gapi.client.sheets.AppendValuesResponse>;
+  addRow(
+    sheetId: string,
+    row: Array<string>
+  ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
+
+  getSheetName(sheetId: string): Promise<string>;
 }
 
-class SheetService implements ISheetService {
-  private sheetId: string;
+export class SheetService implements ISheetService {
+  private client: ISheetClient;
 
-  public async addRow(row: Array<string>) {
-    const response = await gapi.client.sheets.spreadsheets.values.append(
-      {
-        spreadsheetId: this.sheetId,
-        range: "Sheet1!A2:B2",
-        valueInputOption: "USER_ENTERED",
-      },
-      {
-        majorDimension: "ROWS",
-        values: [row],
-      }
-    );
-    console.log("got resonse", response.result);
-    return response.result;
+  constructor() {
+    this.client = new SheetClient();
   }
+
+  private async _handle401(apiPromise: Promise<any>) {
+    try {
+      return await apiPromise;
+    } catch (err: any) {
+      if (err.result.error.code === 401) {
+        await this.client.authenticate();
+        await this.client.requestConsent();
+        return await apiPromise;
+      }
+
+      throw err;
+    }
+  }
+  public async addRow(sheetId: string, row: Array<string>) {
+    return this._handle401(this.client.addRow(sheetId, row));
+  }
+
+  public async getSheetName(sheetId: string): Promise<string> {
+    return this._handle401(this.client.getSheetName(sheetId));
+  }
+}
+
+let _sheetService: ISheetService;
+
+export function getSheetService() {
+  if (!_sheetService) {
+    _sheetService = new SheetService();
+  }
+
+  return _sheetService;
 }

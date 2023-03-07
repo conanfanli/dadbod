@@ -2,6 +2,16 @@ let _sheet_client_singleton: SheetClient;
 declare var gisLoadPromise;
 declare var gapiLoadPromise;
 
+export interface ISheetClient {
+  addRow(
+    sheetId: string,
+    row: Array<string>
+  ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
+  requestConsent(): Promise<void>;
+  authenticate(): Promise<void>;
+  getSheetName(sheetId: string): Promise<string>;
+}
+
 export function getSheetClient() {
   if (!_sheet_client_singleton) {
     console.log("first time setup up sheet client");
@@ -10,12 +20,27 @@ export function getSheetClient() {
   return _sheet_client_singleton;
 }
 
-class SheetClient {
+export class SheetClient implements ISheetClient {
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
   readonly API_KEY = "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg";
   readonly DISCOVERY_DOC =
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
   private tokenClient?: google.accounts.oauth2.TokenClient;
+
+  public async addRow(sheetId: string, row: Array<string>) {
+    const response = await gapi.client.sheets.spreadsheets.values.append(
+      {
+        spreadsheetId: sheetId,
+        range: "Sheet1!A2:B2",
+        valueInputOption: "USER_ENTERED",
+      },
+      {
+        majorDimension: "ROWS",
+        values: [row],
+      }
+    );
+    return response.result;
+  }
 
   public setToken(token: GoogleApiOAuth2TokenObject) {
     localStorage.setItem("spreadsheet_token", JSON.stringify(token));
@@ -103,22 +128,11 @@ class SheetClient {
     });
   }
 
-  public async getName(sheetId: string) {
-    try {
-      // Fetch first 10 files
-      const res = await gapi.client.sheets.spreadsheets.get({
-        spreadsheetId: sheetId,
-      });
-      if (res.status === 200) {
-        return res.result;
-      } else {
-        console.error(res);
-        return null;
-      }
-    } catch (err: any) {
-      console.error(err);
-      return null;
-    }
+  public async getSheetName(sheetId: string) {
+    const res = await gapi.client.sheets.spreadsheets.get({
+      spreadsheetId: sheetId,
+    });
+    return res.result?.properties?.title || "";
   }
 
   public async getRows(sheetId: string) {
