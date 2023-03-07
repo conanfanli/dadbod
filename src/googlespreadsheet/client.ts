@@ -103,25 +103,6 @@ export class SheetClient implements ISheetClient {
         reject(err);
       }
     });
-
-    /*
-    const loadGapi = new Promise<void>((resolve, reject) => {
-      console.log("init gapi");
-      async function initializeGapiClient() {
-        await gapi.client.init({
-          apiKey: self.API_KEY,
-          discoveryDocs: [self.DISCOVERY_DOC],
-        });
-        console.log("set up gapi client");
-        self.getToken();
-
-        resolve();
-      }
-      gapi.load("client", initializeGapiClient);
-    });
-    */
-
-    // await loadGapi;
   }
 
   public async promptConcent() {
