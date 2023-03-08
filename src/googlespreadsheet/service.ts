@@ -1,4 +1,4 @@
-import { SheetClient, ISheetClient } from "./client";
+import { ISheetClient, SheetClient } from "./client";
 
 interface ISheetService {
   saveState(
@@ -13,7 +13,7 @@ interface ISheetService {
   hasConsent(): Promise<boolean>;
 }
 
-export class SheetService implements ISheetService {
+class SheetService implements ISheetService {
   private client: ISheetClient;
 
   public async promptConcent() {

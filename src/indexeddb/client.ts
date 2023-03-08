@@ -1,59 +1,62 @@
 import { IExercise, IExerciseLog } from "../types";
 
+const TABLES = ["events", "exercises", "exercise_logs"] as const;
+
+type Table = (typeof TABLES)[number];
+
 export class DbClient {
   readonly DB_NAME = "workout-log";
   private _db?: IDBDatabase;
   readonly VERSION = 3;
+  private _openRequest: IDBOpenDBRequest;
 
+  public constructor() {
+    console.log("init db client");
+    this._openRequest = indexedDB.open(this.DB_NAME, this.VERSION);
+  }
   public async connect() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.DB_NAME, this.VERSION);
+    const self = this;
+    return new Promise<IDBDatabase>((resolve, reject) => {
+      // const request = indexedDB.open(this.DB_NAME, this.VERSION);
+      console.log("before", self._db);
+      if (self._db) {
+        console.log("already connected");
+        resolve(self._db);
+      }
 
-      request.onerror = (event) => {
+      self._openRequest.onerror = (event) => {
         console.error("error:", event);
         reject(event);
       };
-      request.onsuccess = (event) => {
-        this._db = (event as any).target.result;
-        resolve(this._db);
+      self._openRequest.onsuccess = () => {
+        self._db = this._openRequest.result;
+        console.log("connect", self._db);
+        resolve(self._db);
       };
 
-      request.onupgradeneeded = (event) => {
+      self._openRequest.onupgradeneeded = (event) => {
         console.log(
           "onupgradeneeded",
           "oldVersion:",
           event.oldVersion,
           "latest:",
-          this.VERSION
+          self.VERSION
         );
-        this.db = request.result;
+        self._db = self._openRequest.result;
 
         if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
-          this.db.deleteObjectStore("exercises");
+          self._db.deleteObjectStore("exercises");
         }
-        this.db.createObjectStore("exercises", {
+        self._db.createObjectStore("exercises", {
           keyPath: "name",
         });
-        this.db.createObjectStore("exercise_logs", {
+        self._db.createObjectStore("exercise_logs", {
           keyPath: ["date", "exerciseName"],
         });
 
-        resolve(this._db);
+        resolve(self._db);
       };
     });
-  }
-
-  private get db() {
-    if (!this._db) {
-      throw new Error("DB has not been initialized");
-    }
-    return this._db;
-  }
-  private set db(v: IDBDatabase) {
-    if (!v) {
-      throw new Error("Cannot set db");
-    }
-    this._db = v;
   }
 
   public async getState() {
@@ -63,17 +66,17 @@ export class DbClient {
   }
 
   public async logExercise(data: IExerciseLog) {
-    await this.connect();
-    const store = this.db
+    const db = await this.connect();
+    const store = db
       .transaction("exercise_logs", "readwrite")
       .objectStore("exercise_logs");
     store.put(data);
   }
 
   public async listExercises() {
-    await this.connect();
+    const db = await this.connect();
 
-    const request = this.db
+    const request = db
       .transaction("exercises")
       .objectStore("exercises")
       .getAll();
@@ -85,8 +88,8 @@ export class DbClient {
     );
   }
   public async listLogs() {
-    await this.connect();
-    const request = this.db
+    const db = await this.connect();
+    const request = db
       .transaction("exercise_logs")
       .objectStore("exercise_logs")
       .getAll();
@@ -96,18 +99,19 @@ export class DbClient {
       };
     });
   }
+
   public async addExercise(data: { name: string; description: string }) {
-    await this.connect();
-    const store = this.db
+    const db = await this.connect();
+    const store = db
       .transaction("exercises", "readwrite")
       .objectStore("exercises");
     store.put(data);
   }
 
   public async deleteExercise(name: string, onSuccess: () => void) {
-    await this.connect();
+    const db = await this.connect();
 
-    const request = this.db
+    const request = db
       .transaction("exercises", "readwrite")
       .objectStore("exercises")
       .delete(name);

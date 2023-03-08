@@ -1,0 +1,50 @@
+import { IExercise, IExerciseLog } from "../types";
+import { DbClient } from "./client";
+
+export interface IEventService {
+  getState(): Promise<{
+    exercises: Array<IExercise>;
+    logs: Array<IExerciseLog>;
+  }>;
+  logExercise(data: IExerciseLog): Promise<void>;
+  addExercise(data: IExercise): Promise<void>;
+  deleteExercise(name: string, onSuccess: () => void): Promise<void>;
+  listExercises(): Promise<Array<IExercise>>;
+  listLogs(): Promise<Array<IExerciseLog>>;
+}
+
+class EventService implements IEventService {
+  private client: DbClient;
+
+  constructor() {
+    this.client = new DbClient();
+  }
+
+  public async listExercises() {
+    return this.client.listExercises();
+  }
+  public async listLogs() {
+    return this.client.listLogs();
+  }
+  public async getState() {
+    return this.client.getState();
+  }
+  public async logExercise(data: IExerciseLog) {
+    return this.client.logExercise(data);
+  }
+  public async addExercise(data: IExercise) {
+    return this.client.addExercise(data);
+  }
+  public async deleteExercise(name: string, onSuccess: () => void) {
+    return this.client.deleteExercise(name, onSuccess);
+  }
+}
+
+let _eventService: IEventService;
+export function getEventService() {
+  if (!_eventService) {
+    _eventService = new EventService();
+  }
+
+  return _eventService;
+}
