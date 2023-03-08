@@ -1,10 +1,10 @@
-import { IExercise, IExerciseLog } from "../types";
-
 const TABLES = ["events", "exercises", "exercise_logs"] as const;
 
 type Table = (typeof TABLES)[number];
 
-export class DbClient {
+export interface IDbClient {}
+
+export class DbClient implements IDbClient {
   readonly DB_NAME = "workout-log";
   private _db?: IDBDatabase;
   readonly VERSION = 3;
@@ -54,20 +54,6 @@ export class DbClient {
         resolve(self._db);
       };
     });
-  }
-
-  public async getState() {
-    const exercises = await this.listTable<IExercise>("exercises");
-    const logs = await this.listTable<IExerciseLog>("exercise_logs");
-    return { exercises, logs };
-  }
-
-  public async logExercise(data: IExerciseLog) {
-    const db = await this.connect();
-    const store = db
-      .transaction("exercise_logs", "readwrite")
-      .objectStore("exercise_logs");
-    store.put(data);
   }
 
   public async listTable<T>(table: Table) {

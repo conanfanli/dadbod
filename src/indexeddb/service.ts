@@ -1,11 +1,12 @@
 import { IExercise, IExerciseLog } from "../types";
 import { DbClient } from "./client";
 
+export interface DbState {
+  exercises: Array<IExercise>;
+  exercise_logs: Array<IExerciseLog>;
+}
 export interface IEventService {
-  getState(): Promise<{
-    exercises: Array<IExercise>;
-    logs: Array<IExerciseLog>;
-  }>;
+  getState(): Promise<DbState>;
   logExercise(data: IExerciseLog): Promise<void>;
   addExercise(data: IExercise): Promise<void>;
   deleteExercise(name: string): Promise<void>;
@@ -27,10 +28,12 @@ class EventService implements IEventService {
     return this.client.listTable<IExerciseLog>("exercise_logs");
   }
   public async getState() {
-    return this.client.getState();
+    const exercises = await this.listExercises();
+    const exercise_logs = await this.listLogs();
+    return { exercises, exercise_logs };
   }
   public async logExercise(data: IExerciseLog) {
-    return this.client.logExercise(data);
+    return this.client.putRow("exercise_logs", data);
   }
   public async addExercise(data: IExercise) {
     return this.client.putRow<IExercise>("exercises", data);
