@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Button } from "@mui/material";
 import { Authorize } from "./googlespreadsheet/Auth";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Link, RouterProvider } from "react-router-dom";
 import { Exercises } from "./Exercise";
 
 const router = createBrowserRouter(
@@ -10,11 +10,11 @@ const router = createBrowserRouter(
       path: "/",
       element: (
         <div>
-          <Button fullWidth href="/spreadsheet/authorize">
-            Spreadsheet
+          <Button fullWidth>
+            <Link to="/spreadsheet/authorize">Spreadsheet</Link>
           </Button>
-          <Button fullWidth href="/exercises">
-            Exercises
+          <Button fullWidth>
+            <Link to="/exercises">Exercises</Link>
           </Button>
         </div>
       ),
