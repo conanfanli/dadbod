@@ -1,31 +1,31 @@
+import Delete from "@mui/icons-material/Delete";
 import {
-  ListItemText,
+  IconButton,
   List,
   ListItem,
   ListItemButton,
-  IconButton,
+  ListItemText,
 } from "@mui/material";
 import * as React from "react";
-import { DbClient } from "./indexeddb/client";
 import { AddExerciseForm } from "./AddExerciseForm";
-import Delete from "@mui/icons-material/Delete";
 import { ExerciseLog } from "./ExerciseLog";
 import { IExercise } from "./types";
+import { getEventService } from "./indexeddb/service";
 
 export function Exercises() {
-  const client = React.useMemo(() => new DbClient(), []);
+  const service = React.useMemo(() => getEventService(), []);
   const [exercises, setExercises] = React.useState<Array<IExercise>>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const exercises = await client.listExercises();
+      const exercises = await service.listExercises();
       setExercises(exercises);
     };
     fetchData();
-  }, [client]);
+  }, [service]);
 
   async function deleteExercise(name: string) {
-    client.deleteExercise(name, () =>
+    service.deleteExercise(name, () =>
       setExercises(exercises.filter((r) => r.name !== name))
     );
   }
@@ -33,7 +33,7 @@ export function Exercises() {
     <div>
       <AddExerciseForm
         onSubmit={(data) => {
-          client.addExercise(data);
+          service.addExercise(data);
           setExercises([...exercises, data]);
         }}
       />

@@ -17,10 +17,7 @@ export class DbClient {
   public async connect() {
     const self = this;
     return new Promise<IDBDatabase>((resolve, reject) => {
-      // const request = indexedDB.open(this.DB_NAME, this.VERSION);
-      console.log("before", self._db);
       if (self._db) {
-        console.log("already connected");
         resolve(self._db);
       }
 
@@ -60,8 +57,8 @@ export class DbClient {
   }
 
   public async getState() {
-    const exercises = await this.listExercises();
-    const logs = await this.listLogs();
+    const exercises = await this.listTable<IExercise>("exercises");
+    const logs = await this.listTable<IExerciseLog>("exercise_logs");
     return { exercises, logs };
   }
 
@@ -73,29 +70,16 @@ export class DbClient {
     store.put(data);
   }
 
-  public async listExercises() {
+  public async listTable<T>(table: Table) {
     const db = await this.connect();
-
-    const request = db
-      .transaction("exercises")
-      .objectStore("exercises")
-      .getAll();
-    return new Promise<Array<IExercise>>(
-      (resolve, reject) =>
-        (request.onsuccess = () => {
-          resolve(request.result);
-        })
-    );
-  }
-  public async listLogs() {
-    const db = await this.connect();
-    const request = db
-      .transaction("exercise_logs")
-      .objectStore("exercise_logs")
-      .getAll();
-    return new Promise<Array<IExerciseLog>>((resolve, reject) => {
-      request.onsuccess = () => {
-        resolve(request.result);
+    const query = db.transaction(table).objectStore(table).getAll();
+    return new Promise<Array<T>>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve(query.result);
+      };
+      query.onerror = (event) => {
+        console.error("failed to list table ", event);
+        reject(event);
       };
     });
   }

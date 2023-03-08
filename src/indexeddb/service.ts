@@ -21,10 +21,10 @@ class EventService implements IEventService {
   }
 
   public async listExercises() {
-    return this.client.listExercises();
+    return this.client.listTable<IExercise>("exercises");
   }
   public async listLogs() {
-    return this.client.listLogs();
+    return this.client.listTable<IExerciseLog>("exercise_logs");
   }
   public async getState() {
     return this.client.getState();
