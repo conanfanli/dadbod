@@ -25,9 +25,8 @@ export function Exercises() {
   }, [service]);
 
   async function deleteExercise(name: string) {
-    service.deleteExercise(name, () =>
-      setExercises(exercises.filter((r) => r.name !== name))
-    );
+    await service.deleteExercise(name);
+    setExercises(exercises.filter((r) => r.name !== name));
   }
   return (
     <div>

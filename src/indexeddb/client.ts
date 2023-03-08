@@ -84,23 +84,28 @@ export class DbClient {
     });
   }
 
-  public async addExercise(data: { name: string; description: string }) {
+  public async putRow<T>(table: Table, data: T) {
     const db = await this.connect();
-    const store = db
-      .transaction("exercises", "readwrite")
-      .objectStore("exercises");
+    const store = db.transaction(table, "readwrite").objectStore(table);
     store.put(data);
   }
 
-  public async deleteExercise(name: string, onSuccess: () => void) {
+  public async deleteRow(table: Table, key: string) {
     const db = await this.connect();
 
-    const request = db
-      .transaction("exercises", "readwrite")
-      .objectStore("exercises")
-      .delete(name);
-    request.onsuccess = (event) => {
-      onSuccess();
-    };
+    const query = db
+      .transaction(table, "readwrite")
+      .objectStore(table)
+      .delete(key);
+
+    return new Promise<void>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve();
+      };
+      query.onerror = (event) => {
+        console.error("failed to delte row", event);
+        reject(event);
+      };
+    });
   }
 }

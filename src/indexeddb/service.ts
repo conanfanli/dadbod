@@ -8,7 +8,7 @@ export interface IEventService {
   }>;
   logExercise(data: IExerciseLog): Promise<void>;
   addExercise(data: IExercise): Promise<void>;
-  deleteExercise(name: string, onSuccess: () => void): Promise<void>;
+  deleteExercise(name: string): Promise<void>;
   listExercises(): Promise<Array<IExercise>>;
   listLogs(): Promise<Array<IExerciseLog>>;
 }
@@ -33,10 +33,10 @@ class EventService implements IEventService {
     return this.client.logExercise(data);
   }
   public async addExercise(data: IExercise) {
-    return this.client.addExercise(data);
+    return this.client.putRow<IExercise>("exercises", data);
   }
-  public async deleteExercise(name: string, onSuccess: () => void) {
-    return this.client.deleteExercise(name, onSuccess);
+  public async deleteExercise(key: string) {
+    return this.client.deleteRow("exercises", key);
   }
 }
 
