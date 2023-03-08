@@ -9,18 +9,9 @@ on:
 
 jobs:
   lint:
-    permissions:
-      pages: write
-      id-token: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: npm install -g pnpm
       - run: pnpm i
       - run: make lint
-      - run: pnpm build
-      - uses: actions/upload-pages-artifact@v1
-        with:
-          path: "./build"
-      - uses: actions/deploy-pages@v1
-        id: deployment
