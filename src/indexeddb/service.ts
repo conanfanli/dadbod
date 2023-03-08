@@ -1,16 +1,17 @@
-import { WithKey, IExercise, IExerciseLog } from "../types";
+import { WithId, IExercise, IExerciseLog } from "../types";
+import { v4 as uuidv4 } from "uuid";
 import { DbClient, IDbClient } from "./client";
 
 export interface DbState {
-  exercises: Array<WithKey<IExercise>>;
+  exercises: Array<WithId<IExercise>>;
   exerciseLogs: Array<IExerciseLog>;
 }
 export interface IEventService {
   getState(): Promise<DbState>;
-  logExercise(data: IExerciseLog): Promise<WithKey<IExerciseLog>>;
-  addExercise(data: IExercise): Promise<WithKey<IExercise>>;
+  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
+  addExercise(data: IExercise): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
-  listExercises(): Promise<Array<WithKey<IExercise>>>;
+  listExercises(): Promise<Array<WithId<IExercise>>>;
   listLogs(): Promise<Array<IExerciseLog>>;
 }
 
@@ -22,7 +23,7 @@ class EventService implements IEventService {
   }
 
   public async listExercises() {
-    return this.client.listTable<WithKey<IExercise>>("exercises");
+    return this.client.listTable<WithId<IExercise>>("exercises");
   }
   public async listLogs() {
     return this.client.listTable<IExerciseLog>("exerciseLogs");
@@ -33,13 +34,26 @@ class EventService implements IEventService {
     return { exercises, exerciseLogs };
   }
   public async logExercise(data: IExerciseLog) {
-    return this.client.putRow("exerciseLogs", data);
+    let existing = await this.client.getByIndex<WithId<IExerciseLog>>(
+      "exerciseLogs",
+      "date-exerciseId",
+      [data.date, data.exerciseId]
+    );
+
+    return this.client.putRow<WithId<IExerciseLog>>("exerciseLogs", {
+      id: existing ? existing.id : uuidv4(),
+      ...data,
+    });
   }
   public async addExercise(data: IExercise) {
-    return this.client.putRow<IExercise>("exercises", data);
+    const id = uuidv4();
+    return this.client.putRow<WithId<IExercise>>("exercises", {
+      id,
+      ...data,
+    });
   }
-  public async deleteExercise(key: string) {
-    return this.client.deleteRow("exercises", key);
+  public async deleteExercise(id: string) {
+    return this.client.deleteRow("exercises", id);
   }
 }
 

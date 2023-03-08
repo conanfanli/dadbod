@@ -22,6 +22,7 @@ specifiers:
   react-router-dom: ^6.8.1
   react-scripts: 5.0.1
   typescript: ^4.9.5
+  uuid: ^9.0.0
   web-vitals: ^2.1.4
 
 dependencies:
@@ -41,6 +42,7 @@ dependencies:
   react-router-dom: 6.8.1_biqbaboplfbrettd7655fr4n2y
   react-scripts: 5.0.1_j5ip3o3v6sktjzl5cxtjyfbuo4
   typescript: 4.9.5
+  uuid: 9.0.0
   web-vitals: 2.1.4
 
 devDependencies:
@@ -2056,8 +2058,8 @@ packages:
       '@types/gapi.client.discovery': 1.0.9
     dev: true
 
-  /@maxim_mazurok/gapi.client.sheets-v4/0.0.20230227:
-    resolution: {integrity: sha512-tEnnWlcazS6+DXY5QGjh9u3zPw3v1mltaNxdshI0Me110X3P0+GbFRi0PJlsi8mOWJfJh19Y98GC1RS462AezA==}
+  /@maxim_mazurok/gapi.client.sheets-v4/0.0.20230228:
+    resolution: {integrity: sha512-Vuv6HPypB+wHy6HgPOC4RKvlBRISOHit7hMAQXa06Oxg2Schl8plgf9MWMWtCjmifQUwOYZZDks08sUSl7BGFQ==}
     dependencies:
       '@types/gapi.client': 1.0.5
       '@types/gapi.client.discovery': 1.0.9
@@ -2685,7 +2687,7 @@ packages:
   /@types/gapi.client.sheets/4.0.20201031:
     resolution: {integrity: sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==}
     dependencies:
-      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230227
+      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230228
     dev: true
 
   /@types/gapi.client/1.0.5:
@@ -9933,6 +9935,11 @@ packages:
 
   /uuid/8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    hasBin: true
+    dev: false
+
+  /uuid/9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
     hasBin: true
     dev: false
 

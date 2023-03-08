@@ -1,17 +1,22 @@
-import type { WithKey } from "../types";
+import type { WithId } from "../types";
 const TABLES = ["events", "exercises", "exerciseLogs"] as const;
 
 type Table = (typeof TABLES)[number];
 
 export interface IDbClient {
   listTable<T>(table: Table): Promise<Array<T>>;
-  putRow<T>(table: Table, data: T): Promise<WithKey<T>>;
-  deleteRow(table: Table, key: string): Promise<void>;
+  putRow<T extends { id: string }>(table: Table, data: T): Promise<T>;
+  deleteRow(table: Table, id: string): Promise<void>;
+  getByIndex<T extends { id: string }>(
+    table: Table,
+    indexName: string,
+    value: string | string[]
+  ): Promise<T>;
 }
 
 export class DbClient implements IDbClient {
   readonly DB_NAME = "workout-log";
-  readonly LATEST_VERSION = 6;
+  readonly LATEST_VERSION = 9;
   private _openRequest: IDBOpenDBRequest;
   private _db?: IDBDatabase;
 
@@ -33,30 +38,31 @@ export class DbClient implements IDbClient {
     if (version >= 2 && version < self.LATEST_VERSION) {
       db.deleteObjectStore("exercises");
       db.deleteObjectStore("exerciseLogs");
-      db.deleteObjectStore("exercise_logs");
       db.deleteObjectStore("events");
     }
 
     // Create new tables
-    // exercises: key, name, description
+    // exercises: id, name, description
     const exercisesStore = db.createObjectStore("exercises", {
-      autoIncrement: true,
+      keyPath: "id",
     });
     exercisesStore.createIndex("name", "name", { unique: true });
 
-    // exerciseLogs: date, exerciseKey, createdAt
+    // exerciseLogs: date, exerciseId, createdAt
     const logStore = db.createObjectStore("exerciseLogs", {
-      keyPath: ["date", "exerciseKey"],
+      keyPath: "id",
     });
-    logStore.createIndex("createdAt", "createdAt", { unique: false });
+    logStore.createIndex("date-exerciseId", ["date", "exerciseId"], {
+      unique: true,
+    });
 
-    // events: key, createdAt, action, entityKey
+    // events: id, createdAt, action, entityId
     const eventStore = db.createObjectStore("events", {
-      autoIncrement: true,
+      keyPath: "id",
     });
     eventStore.createIndex("createdAt", "createdAt", { unique: false });
     eventStore.createIndex("action", "action", { unique: false });
-    eventStore.createIndex("entityKey", "entityKey", { unique: false });
+    eventStore.createIndex("entityId", "entityId", { unique: false });
   }
 
   private async connect() {
@@ -96,10 +102,7 @@ export class DbClient implements IDbClient {
     const db = await this.connect();
     const query = db.transaction(table).objectStore(table).getAll();
     return new Promise<Array<T>>((resolve, reject) => {
-      query.onsuccess = (event) => {
-        console.log("query.result", query.result);
-        console.log("query", query);
-        console.log("event", event);
+      query.onsuccess = () => {
         resolve(query.result);
       };
       query.onerror = (event) => {
@@ -109,29 +112,49 @@ export class DbClient implements IDbClient {
     });
   }
 
-  public async putRow<T>(table: Table, data: T) {
+  public async getByIndex<T extends { id: string }>(
+    table: Table,
+    indexName: string,
+    value: string | string[]
+  ) {
     const db = await this.connect();
-    const store = db.transaction(table, "readwrite").objectStore(table);
+    const index = db.transaction(table).objectStore(table).index(indexName);
+    const query = index.get(value);
 
-    const query = store.put(data);
-    return new Promise<WithKey<T>>((resolve, reject) => {
+    return new Promise<T>((resolve, reject) => {
       query.onsuccess = () => {
-        resolve({ ...data, key: query.result.toString() });
+        resolve(query.result);
       };
       query.onerror = (event) => {
-        console.error("failed to delte row", event);
+        console.error("failed to list table ", event);
         reject(event);
       };
     });
   }
 
-  public async deleteRow(table: Table, key: string) {
+  public async putRow<T extends { id: string }>(table: Table, data: T) {
+    const db = await this.connect();
+    const store = db.transaction(table, "readwrite").objectStore(table);
+
+    const query = store.put(data);
+    return new Promise<WithId<T>>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve(data);
+      };
+      query.onerror = (event) => {
+        console.error("failed to put row", event, data);
+        reject(event);
+      };
+    });
+  }
+
+  public async deleteRow(table: Table, id: string) {
     const db = await this.connect();
 
     const query = db
       .transaction(table, "readwrite")
       .objectStore(table)
-      .delete(key);
+      .delete(id);
 
     return new Promise<void>((resolve, reject) => {
       query.onsuccess = () => {

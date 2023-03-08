@@ -9,12 +9,12 @@ import {
 import * as React from "react";
 import { AddExerciseForm } from "./AddExerciseForm";
 import { ExerciseLog } from "./ExerciseLog";
-import { WithKey, IExercise } from "./types";
+import { WithId, IExercise } from "./types";
 import { getEventService } from "./indexeddb/service";
 
 export function Exercises() {
   const service = React.useMemo(() => getEventService(), []);
-  const [exercises, setExercises] = React.useState<Array<WithKey<IExercise>>>(
+  const [exercises, setExercises] = React.useState<Array<WithId<IExercise>>>(
     []
   );
 
@@ -26,9 +26,9 @@ export function Exercises() {
     fetchData();
   }, [service]);
 
-  async function deleteExercise(name: string) {
-    await service.deleteExercise(name);
-    setExercises(exercises.filter((r) => r.name !== name));
+  async function deleteExercise(id: string) {
+    await service.deleteExercise(id);
+    setExercises(exercises.filter((r) => r.id !== id));
   }
   return (
     <div>
@@ -47,23 +47,27 @@ function ExerciseList({
   exercises,
   deleteExercise,
 }: {
-  exercises: Array<WithKey<IExercise>>;
-  deleteExercise: (name: string) => void;
+  exercises: Array<WithId<IExercise>>;
+  deleteExercise: (id: string) => void;
 }) {
   const [active, setActive] = React.useState("");
 
   return (
     <List sx={{ width: "100%" }}>
       {exercises.map((row, index) => [
-        <ListItem key={row.name} disablePadding>
-          <ListItemButton onClick={() => setActive(row.name)}>
-            <ListItemText key={row.name} primary={row.name} />
-            <IconButton onClick={() => deleteExercise(row.name)}>
+        <ListItem key={row.id} disablePadding>
+          <ListItemButton onClick={() => setActive(row.id)}>
+            <ListItemText
+              key={row.id}
+              primary={row.name}
+              secondary={row.description}
+            />
+            <IconButton onClick={() => deleteExercise(row.id)}>
               <Delete color="secondary" />
             </IconButton>
           </ListItemButton>
         </ListItem>,
-        active === row.name ? <ExerciseLog key={index} row={row} /> : null,
+        active === row.id ? <ExerciseLog key={index} row={row} /> : null,
       ])}
     </List>
   );

@@ -10,11 +10,11 @@ import {
 } from "@mui/material";
 import React from "react";
 import { getEventService } from "./indexeddb/service";
-import type { IExercise, ISet } from "./types";
+import type { IExercise, ISet, WithId } from "./types";
 
 const today = new Date().toLocaleDateString();
 
-export function ExerciseLog({ row }: { row: IExercise }) {
+export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
   console.log("render exercise log ...");
   const service = React.useMemo(() => getEventService(), []);
 
@@ -23,10 +23,10 @@ export function ExerciseLog({ row }: { row: IExercise }) {
   React.useEffect(() => {
     async function fetchData() {
       const logs = await service.listLogs();
-      setSets(logs.find((log) => log.exerciseName === row.name)?.sets || []);
+      setSets(logs.find((log) => log.exerciseId === row.id)?.sets || []);
     }
     fetchData();
-  }, [service, row.name]);
+  }, [service, row.id]);
 
   const setsWithNewRow =
     sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
@@ -39,7 +39,7 @@ export function ExerciseLog({ row }: { row: IExercise }) {
 
     service.logExercise({
       date: today,
-      exerciseName: row.name,
+      exerciseId: row.id,
       sets: newSets,
     });
   }
@@ -78,7 +78,7 @@ export function ExerciseLog({ row }: { row: IExercise }) {
               setSets(newSets);
               service.logExercise({
                 date: today,
-                exerciseName: row.name,
+                exerciseId: row.id,
                 sets: newSets,
               });
             }}
