@@ -3,6 +3,10 @@ export interface IExercise {
   description: string;
 }
 
+export type WithKey<T> = {
+  [P in keyof T]: T[P];
+} & { key: string };
+
 export interface IExerciseLog {
   date: string;
   exerciseName: string;

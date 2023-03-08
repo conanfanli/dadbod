@@ -9,12 +9,14 @@ import {
 import * as React from "react";
 import { AddExerciseForm } from "./AddExerciseForm";
 import { ExerciseLog } from "./ExerciseLog";
-import { IExercise } from "./types";
+import { WithKey, IExercise } from "./types";
 import { getEventService } from "./indexeddb/service";
 
 export function Exercises() {
   const service = React.useMemo(() => getEventService(), []);
-  const [exercises, setExercises] = React.useState<Array<IExercise>>([]);
+  const [exercises, setExercises] = React.useState<Array<WithKey<IExercise>>>(
+    []
+  );
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -31,9 +33,9 @@ export function Exercises() {
   return (
     <div>
       <AddExerciseForm
-        onSubmit={(data) => {
-          service.addExercise(data);
-          setExercises([...exercises, data]);
+        onSubmit={async (data) => {
+          const added = await service.addExercise(data);
+          setExercises([...exercises, added]);
         }}
       />
       <ExerciseList exercises={exercises} deleteExercise={deleteExercise} />
@@ -45,7 +47,7 @@ function ExerciseList({
   exercises,
   deleteExercise,
 }: {
-  exercises: Array<IExercise>;
+  exercises: Array<WithKey<IExercise>>;
   deleteExercise: (name: string) => void;
 }) {
   const [active, setActive] = React.useState("");

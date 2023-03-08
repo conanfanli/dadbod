@@ -1,39 +1,39 @@
-import { IExercise, IExerciseLog } from "../types";
-import { DbClient } from "./client";
+import { WithKey, IExercise, IExerciseLog } from "../types";
+import { DbClient, IDbClient } from "./client";
 
 export interface DbState {
-  exercises: Array<IExercise>;
-  exercise_logs: Array<IExerciseLog>;
+  exercises: Array<WithKey<IExercise>>;
+  exerciseLogs: Array<IExerciseLog>;
 }
 export interface IEventService {
   getState(): Promise<DbState>;
-  logExercise(data: IExerciseLog): Promise<void>;
-  addExercise(data: IExercise): Promise<void>;
+  logExercise(data: IExerciseLog): Promise<WithKey<IExerciseLog>>;
+  addExercise(data: IExercise): Promise<WithKey<IExercise>>;
   deleteExercise(name: string): Promise<void>;
-  listExercises(): Promise<Array<IExercise>>;
+  listExercises(): Promise<Array<WithKey<IExercise>>>;
   listLogs(): Promise<Array<IExerciseLog>>;
 }
 
 class EventService implements IEventService {
-  private client: DbClient;
+  private client: IDbClient;
 
   constructor() {
     this.client = new DbClient();
   }
 
   public async listExercises() {
-    return this.client.listTable<IExercise>("exercises");
+    return this.client.listTable<WithKey<IExercise>>("exercises");
   }
   public async listLogs() {
-    return this.client.listTable<IExerciseLog>("exercise_logs");
+    return this.client.listTable<IExerciseLog>("exerciseLogs");
   }
   public async getState() {
     const exercises = await this.listExercises();
-    const exercise_logs = await this.listLogs();
-    return { exercises, exercise_logs };
+    const exerciseLogs = await this.listLogs();
+    return { exercises, exerciseLogs };
   }
   public async logExercise(data: IExerciseLog) {
-    return this.client.putRow("exercise_logs", data);
+    return this.client.putRow("exerciseLogs", data);
   }
   public async addExercise(data: IExercise) {
     return this.client.putRow<IExercise>("exercises", data);
