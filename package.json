@@ -1,6 +1,6 @@
 {
   "name": "workout-log",
-  "homepage": "https://conanfanli.github.io/workout-log/",
+  "homepage": ".",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
