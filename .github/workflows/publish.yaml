@@ -16,9 +16,10 @@ jobs:
     permissions:
       pages: write
       id-token: write
-    - run: pnpm build
-    - uses: actions/upload-pages-artifact@v1
-      with:
-        path: "./build"
-    - uses: actions/deploy-pages@v1
-      id: deployment
+    steps:
+      - run: pnpm build
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: "./build"
+      - uses: actions/deploy-pages@v1
+        id: deployment
