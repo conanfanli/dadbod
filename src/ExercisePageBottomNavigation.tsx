@@ -43,6 +43,7 @@ export function ExercisePageBottomNavigation() {
         <BottomNavigationAction
           label="last synced"
           icon={<CloudSync color="primary" />}
+          onClick={() => service.syncState()}
         ></BottomNavigationAction>
       </BottomNavigation>
     </Paper>

@@ -1,4 +1,10 @@
-import type { IEvent, IExercise, IExerciseLog, WithId } from "../types";
+import type {
+  DbState,
+  IEvent,
+  IExercise,
+  IExerciseLog,
+  WithId,
+} from "../types";
 import Dexie, { Table as DexieTable } from "dexie";
 
 export class DbClient extends Dexie {
@@ -17,5 +23,12 @@ export class DbClient extends Dexie {
       events: "id, action, entityId, createdAt",
     });
     console.log("inited db client");
+  }
+
+  public async serialize(): Promise<DbState> {
+    const exercises = await this.exercises.toArray();
+    const exerciseLogs = await this.exerciseLogs.toArray();
+    const events = await this.events.toArray();
+    return { exercises, exerciseLogs, events, date: new Date().toISOString() };
   }
 }

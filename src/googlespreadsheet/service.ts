@@ -1,7 +1,9 @@
+import type { DbState } from "../types";
 import { ISheetClient, SheetClient } from "./client";
 
 export interface ISheetService {
   getRows(): Promise<[string, string][] | null>;
+  getLatestState(): Promise<DbState | null>;
   getSheetName(): Promise<string>;
   hasConsent(): Promise<boolean>;
   promptConcent(): Promise<void>;
@@ -21,6 +23,15 @@ class SheetService implements ISheetService {
   constructor() {
     this.client = new SheetClient();
     this._sheetId = localStorage.getItem("spreadsheet_id") || "";
+  }
+
+  public async getLatestState(): Promise<DbState | null> {
+    const rows = await this.getRows();
+    if (rows && rows.length > 0) {
+      return JSON.parse(rows[rows.length - 1][1]);
+    }
+
+    return null;
   }
 
   public get sheetId() {

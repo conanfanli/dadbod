@@ -37,3 +37,9 @@ export interface IEvent {
   createdAt: string;
   payload: {};
 }
+export interface DbState {
+  date: string;
+  events: Array<IEvent>;
+  exerciseLogs: Array<IExerciseLog>;
+  exercises: Array<WithId<IExercise>>;
+}

@@ -1,23 +1,20 @@
-import { WithId, IExercise, IExerciseLog } from "../types";
+import { DbState, WithId, IExercise, IExerciseLog } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { DbClient } from "./client";
 import { getSheetService, ISheetService } from "../googlespreadsheet/service";
 
-export interface DbState {
-  exercises: Array<WithId<IExercise>>;
-  exerciseLogs: Array<IExerciseLog>;
-}
 export interface IEventService {
   createExercise(data: IExercise): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
-  getState(): Promise<DbState>;
   getConnectedSheetName(): Promise<string>;
-  listExercises(): Promise<Array<WithId<IExercise>>>;
-  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
   getExerciseSets(filter: {
     date: string;
     exerciseId: string;
   }): Promise<Array<IExerciseLog>>;
+  getState(): Promise<DbState>;
+  listExercises(): Promise<Array<WithId<IExercise>>>;
+  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
+  syncState(): Promise<void>;
 }
 
 class EventService implements IEventService {
@@ -27,6 +24,13 @@ class EventService implements IEventService {
   constructor() {
     this.db = new DbClient();
     this.ss = getSheetService();
+  }
+
+  public async syncState(): Promise<void> {
+    const lastEvent = await this.db.events.orderBy("createdAt").last();
+    const latestRow = await this.ss.getLatestState();
+    console.log(lastEvent);
+    console.log(latestRow);
   }
 
   public async getConnectedSheetName(): Promise<string> {
@@ -42,10 +46,9 @@ class EventService implements IEventService {
   public async getExerciseSets(filter: { date: string; exerciseId: string }) {
     return this.db.exerciseLogs.where(filter).toArray();
   }
+
   public async getState() {
-    const exercises = await this.listExercises();
-    const exerciseLogs = await this.db.exerciseLogs.toArray();
-    return { exercises, exerciseLogs };
+    return this.db.serialize();
   }
 
   // TODO: split create and update
