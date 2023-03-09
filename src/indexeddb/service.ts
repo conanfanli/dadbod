@@ -1,6 +1,6 @@
 import { WithId, IExercise, IExerciseLog } from "../types";
 import { v4 as uuidv4 } from "uuid";
-import { DbClient, IDbClient } from "./client";
+import { DbClient } from "./client";
 import { getSheetService, ISheetService } from "../googlespreadsheet/service";
 
 export interface DbState {
@@ -18,11 +18,11 @@ export interface IEventService {
 }
 
 class EventService implements IEventService {
-  private client: IDbClient;
+  private db: DbClient;
   private ss: ISheetService;
 
   constructor() {
-    this.client = new DbClient();
+    this.db = new DbClient();
     this.ss = getSheetService();
   }
 
@@ -31,37 +31,38 @@ class EventService implements IEventService {
   }
 
   public async listExercises() {
-    return this.client.listTable<WithId<IExercise>>("exercises");
+    return this.db.exercises.toArray();
   }
   public async listLogs() {
-    return this.client.listTable<IExerciseLog>("exerciseLogs");
+    return this.db.exerciseLogs.toArray();
   }
   public async getState() {
     const exercises = await this.listExercises();
     const exerciseLogs = await this.listLogs();
     return { exercises, exerciseLogs };
   }
-  public async logExercise(data: IExerciseLog) {
-    let existing = await this.client.getByIndex<WithId<IExerciseLog>>(
-      "exerciseLogs",
-      "date-exerciseId",
-      [data.date, data.exerciseId]
-    );
 
-    return this.client.putRow<WithId<IExerciseLog>>("exerciseLogs", {
+  public async logExercise(data: IExerciseLog) {
+    let existing = await this.db.exerciseLogs.get({
+      date: data.date,
+      exerciseId: data.exerciseId,
+    });
+
+    const log = {
       id: existing ? existing.id : uuidv4(),
       ...data,
-    });
+    };
+    await this.db.exerciseLogs.put(log, log.id);
+    return log;
   }
   public async addExercise(data: IExercise) {
-    const id = uuidv4();
-    return this.client.putRow<WithId<IExercise>>("exercises", {
-      id,
-      ...data,
-    });
+    const item = { id: uuidv4(), ...data };
+    await this.db.exercises.add(item);
+    return item;
   }
+
   public async deleteExercise(id: string) {
-    return this.client.deleteRow("exercises", id);
+    await this.db.exercises.delete(id);
   }
 }
 
