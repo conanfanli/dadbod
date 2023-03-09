@@ -1,20 +1,27 @@
 import { ISheetClient, SheetClient } from "./client";
 
-interface ISheetService {
+export interface ISheetService {
+  getRows(sheeId: string): Promise<[string, string][] | null>;
+  getSheetName(sheetId: string): Promise<string>;
+  hasConsent(): Promise<boolean>;
+  promptConcent(): Promise<void>;
+
+  /**
+   * Backup entire DB state to spreadsheet
+   */
   saveState(
     sheetId: string,
     jsonState: string
   ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
-
-  getRows(sheeId: string): Promise<[string, string][] | null>;
-  getSheetName(sheetId: string): Promise<string>;
-
-  promptConcent(): Promise<void>;
-  hasConsent(): Promise<boolean>;
 }
 
 class SheetService implements ISheetService {
   private client: ISheetClient;
+
+  public async hasConsent() {
+    await this.client.connect();
+    return !!this.client.getToken();
+  }
 
   public async promptConcent() {
     return await this.client.promptConcent();
@@ -22,11 +29,6 @@ class SheetService implements ISheetService {
 
   constructor() {
     this.client = new SheetClient();
-  }
-
-  public async hasConsent() {
-    await this.client.connect();
-    return !!this.client.getToken();
   }
 
   private async _handle401<T>(apiPromise: Promise<T>): Promise<T> {

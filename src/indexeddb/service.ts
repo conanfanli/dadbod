@@ -1,25 +1,33 @@
 import { WithId, IExercise, IExerciseLog } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { DbClient, IDbClient } from "./client";
+import { getSheetService, ISheetService } from "../googlespreadsheet/service";
 
 export interface DbState {
   exercises: Array<WithId<IExercise>>;
   exerciseLogs: Array<IExerciseLog>;
 }
 export interface IEventService {
-  getState(): Promise<DbState>;
-  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
   addExercise(data: IExercise): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
+  getState(): Promise<DbState>;
+  isReadyToSync(): Promise<boolean>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
   listLogs(): Promise<Array<IExerciseLog>>;
+  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
 }
 
 class EventService implements IEventService {
   private client: IDbClient;
+  private ss: ISheetService;
 
   constructor() {
     this.client = new DbClient();
+    this.ss = getSheetService();
+  }
+
+  public async isReadyToSync(): Promise<boolean> {
+    return this.ss.hasConsent();
   }
 
   public async listExercises() {
