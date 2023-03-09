@@ -12,31 +12,22 @@ import { ExerciseLog } from "./ExerciseLog";
 import { WithId, IExercise } from "./types";
 import { getEventService } from "./indexeddb/service";
 import { ExercisePageBottomNavigation } from "./ExercisePageBottomNavigation";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export function Exercises() {
   const service = React.useMemo(() => getEventService(), []);
-  const [exercises, setExercises] = React.useState<Array<WithId<IExercise>>>(
-    []
-  );
 
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const exercises = await service.listExercises();
-      setExercises(exercises);
-    };
-    fetchData();
-  }, [service]);
+  const exercises =
+    useLiveQuery(() => service.listExercises(), [service]) || [];
 
   async function deleteExercise(id: string) {
     await service.deleteExercise(id);
-    setExercises(exercises.filter((r) => r.id !== id));
   }
   return (
     <div>
       <AddExerciseForm
         onSubmit={async (data) => {
-          const added = await service.createExercise(data);
-          setExercises([...exercises, added]);
+          await service.createExercise(data);
         }}
       />
       <ExerciseList exercises={exercises} deleteExercise={deleteExercise} />
