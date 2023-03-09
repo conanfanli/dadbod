@@ -13,7 +13,10 @@ export interface IEventService {
   getState(): Promise<DbState>;
   isReadyToSync(): Promise<boolean>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
-  listLogs(): Promise<Array<IExerciseLog>>;
+  getExerciseSets(filter: {
+    date: string;
+    exerciseId: string;
+  }): Promise<Array<IExerciseLog>>;
   logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
 }
 
@@ -33,12 +36,12 @@ class EventService implements IEventService {
   public async listExercises() {
     return this.db.exercises.toArray();
   }
-  public async listLogs() {
-    return this.db.exerciseLogs.toArray();
+  public async getExerciseSets(filter: { date: string; exerciseId: string }) {
+    return this.db.exerciseLogs.where(filter).toArray();
   }
   public async getState() {
     const exercises = await this.listExercises();
-    const exerciseLogs = await this.listLogs();
+    const exerciseLogs = await this.db.exerciseLogs.toArray();
     return { exercises, exerciseLogs };
   }
 
@@ -75,7 +78,20 @@ class EventService implements IEventService {
   }
 
   public async deleteExercise(id: string) {
-    await this.db.exercises.delete(id);
+    return this.db.transaction(
+      "rw",
+      this.db.exercises,
+      this.db.events,
+      async () => {
+        await this.db.exercises.delete(id);
+        await this.db.events.add({
+          id: uuidv4(),
+          action: "delete-exercise",
+          createdAt: new Date().toISOString(),
+          entityId: id,
+        });
+      }
+    );
   }
 }
 

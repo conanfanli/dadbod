@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { getEventService } from "./indexeddb/service";
 import type { IExercise, ISet, WithId } from "./types";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const today = new Date().toLocaleDateString();
 
@@ -18,15 +19,16 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
   console.log("render exercise log ...");
   const service = React.useMemo(() => getEventService(), []);
 
-  const [sets, setSets] = React.useState<ISet[]>([]);
+  const sets =
+    useLiveQuery(async () => {
+      const items = await service.getExerciseSets({
+        date: today,
+        exerciseId: row.id,
+      });
+      return items.length > 0 ? items[items.length - 1].sets : [];
+    }, [service]) || [];
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const logs = await service.listLogs();
-      setSets(logs.find((log) => log.exerciseId === row.id)?.sets || []);
-    }
-    fetchData();
-  }, [service, row.id]);
+  function setSets(args) {}
 
   const setsWithNewRow =
     sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
