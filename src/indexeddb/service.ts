@@ -56,9 +56,22 @@ class EventService implements IEventService {
     return log;
   }
   public async createExercise(data: IExercise) {
-    const item = { id: uuidv4(), ...data };
-    await this.db.exercises.add(item);
-    return item;
+    return this.db.transaction(
+      "rw",
+      this.db.exercises,
+      this.db.events,
+      async () => {
+        const item = { id: uuidv4(), ...data };
+        await this.db.exercises.add(item);
+        await this.db.events.add({
+          id: uuidv4(),
+          action: "create-exercise",
+          createdAt: new Date().toISOString(),
+          entityId: item.id,
+        });
+        return item;
+      }
+    );
   }
 
   public async deleteExercise(id: string) {

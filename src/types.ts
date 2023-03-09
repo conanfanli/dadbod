@@ -18,3 +18,17 @@ export interface ISet {
   weight: number;
   reps: number;
 }
+
+const ACTIONS = [
+  "create-exercise",
+  "update-exercise",
+  "delete-exercise",
+  "upload-state",
+] as const;
+
+export type ActionType = (typeof ACTIONS)[number];
+export interface IEvent {
+  action: ActionType;
+  entityId: string;
+  createdAt: string;
+}

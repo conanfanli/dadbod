@@ -1,4 +1,4 @@
-import type { IExercise, IExerciseLog, WithId } from "../types";
+import type { IEvent, IExercise, IExerciseLog, WithId } from "../types";
 import Dexie, { Table as DexieTable } from "dexie";
 
 export class DbClient extends Dexie {
@@ -7,6 +7,7 @@ export class DbClient extends Dexie {
 
   exercises!: DexieTable<WithId<IExercise>>;
   exerciseLogs!: DexieTable<WithId<IExerciseLog>>;
+  events!: DexieTable<WithId<IEvent>>;
 
   public constructor() {
     super(DbClient.DB_NAME);
