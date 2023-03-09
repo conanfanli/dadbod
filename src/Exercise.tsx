@@ -35,7 +35,7 @@ export function Exercises() {
     <div>
       <AddExerciseForm
         onSubmit={async (data) => {
-          const added = await service.addExercise(data);
+          const added = await service.createExercise(data);
           setExercises([...exercises, added]);
         }}
       />

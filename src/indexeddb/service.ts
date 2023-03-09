@@ -8,7 +8,7 @@ export interface DbState {
   exerciseLogs: Array<IExerciseLog>;
 }
 export interface IEventService {
-  addExercise(data: IExercise): Promise<WithId<IExercise>>;
+  createExercise(data: IExercise): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
   getState(): Promise<DbState>;
   isReadyToSync(): Promise<boolean>;
@@ -55,7 +55,7 @@ class EventService implements IEventService {
     await this.db.exerciseLogs.put(log, log.id);
     return log;
   }
-  public async addExercise(data: IExercise) {
+  public async createExercise(data: IExercise) {
     const item = { id: uuidv4(), ...data };
     await this.db.exercises.add(item);
     return item;
