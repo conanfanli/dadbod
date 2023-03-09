@@ -1,118 +1,169 @@
-import { IExercise, IExerciseLog } from "../types";
+import type { WithId } from "../types";
+const TABLES = ["events", "exercises", "exerciseLogs"] as const;
 
-export class DbClient {
+type Table = (typeof TABLES)[number];
+
+export interface IDbClient {
+  listTable<T>(table: Table): Promise<Array<T>>;
+  putRow<T extends { id: string }>(table: Table, data: T): Promise<T>;
+  deleteRow(table: Table, id: string): Promise<void>;
+  getByIndex<T extends { id: string }>(
+    table: Table,
+    indexName: string,
+    value: string | string[]
+  ): Promise<T>;
+}
+
+export class DbClient implements IDbClient {
   readonly DB_NAME = "workout-log";
+  readonly LATEST_VERSION = 9;
+  private _openRequest: IDBOpenDBRequest;
   private _db?: IDBDatabase;
-  readonly VERSION = 3;
 
-  public async connect() {
-    return new Promise((resolve, reject) => {
-      const request = indexedDB.open(this.DB_NAME, this.VERSION);
+  public constructor() {
+    console.log("init db client");
+    this._openRequest = indexedDB.open(this.DB_NAME, this.LATEST_VERSION);
+  }
 
-      request.onerror = (event) => {
+  private migrate(event: IDBVersionChangeEvent) {
+    const self = this;
+    const db = self!._db;
+    const version = event.oldVersion;
+
+    if (!db) {
+      throw new Error("db not available");
+    }
+
+    // Destroy existing db
+    if (version >= 2 && version < self.LATEST_VERSION) {
+      db.deleteObjectStore("exercises");
+      db.deleteObjectStore("exerciseLogs");
+      db.deleteObjectStore("events");
+    }
+
+    // Create new tables
+    // exercises: id, name, description
+    const exercisesStore = db.createObjectStore("exercises", {
+      keyPath: "id",
+    });
+    exercisesStore.createIndex("name", "name", { unique: true });
+
+    // exerciseLogs: date, exerciseId, createdAt
+    const logStore = db.createObjectStore("exerciseLogs", {
+      keyPath: "id",
+    });
+    logStore.createIndex("date-exerciseId", ["date", "exerciseId"], {
+      unique: true,
+    });
+
+    // events: id, createdAt, action, entityId
+    const eventStore = db.createObjectStore("events", {
+      keyPath: "id",
+    });
+    eventStore.createIndex("createdAt", "createdAt", { unique: false });
+    eventStore.createIndex("action", "action", { unique: false });
+    eventStore.createIndex("entityId", "entityId", { unique: false });
+  }
+
+  private async connect() {
+    const self = this;
+    return new Promise<IDBDatabase>((resolve, reject) => {
+      if (self._db) {
+        resolve(self._db);
+      }
+
+      self._openRequest.onerror = (event) => {
         console.error("error:", event);
         reject(event);
       };
-      request.onsuccess = (event) => {
-        this._db = (event as any).target.result;
-        resolve(this._db);
+      self._openRequest.onsuccess = () => {
+        self._db = this._openRequest.result;
+        console.log("connect", self._db);
+        resolve(self._db);
       };
 
-      request.onupgradeneeded = (event) => {
+      self._openRequest.onupgradeneeded = (event) => {
         console.log(
           "onupgradeneeded",
           "oldVersion:",
           event.oldVersion,
           "latest:",
-          this.VERSION
+          self.LATEST_VERSION
         );
-        this.db = request.result;
+        self._db = self._openRequest.result;
+        self.migrate(event);
 
-        if (event.oldVersion < this.VERSION && event.oldVersion > 1) {
-          this.db.deleteObjectStore("exercises");
-        }
-        this.db.createObjectStore("exercises", {
-          keyPath: "name",
-        });
-        this.db.createObjectStore("exercise_logs", {
-          keyPath: ["date", "exerciseName"],
-        });
-
-        resolve(this._db);
+        resolve(self._db);
       };
     });
   }
 
-  private get db() {
-    if (!this._db) {
-      throw new Error("DB has not been initialized");
-    }
-    return this._db;
-  }
-  private set db(v: IDBDatabase) {
-    if (!v) {
-      throw new Error("Cannot set db");
-    }
-    this._db = v;
-  }
-
-  public async getState() {
-    const exercises = await this.listExercises();
-    const logs = await this.listLogs();
-    return { exercises, logs };
-  }
-
-  public async logExercise(data: IExerciseLog) {
-    await this.connect();
-    const store = this.db
-      .transaction("exercise_logs", "readwrite")
-      .objectStore("exercise_logs");
-    store.put(data);
-  }
-
-  public async listExercises() {
-    await this.connect();
-
-    const request = this.db
-      .transaction("exercises")
-      .objectStore("exercises")
-      .getAll();
-    return new Promise<Array<IExercise>>(
-      (resolve, reject) =>
-        (request.onsuccess = () => {
-          resolve(request.result);
-        })
-    );
-  }
-  public async listLogs() {
-    await this.connect();
-    const request = this.db
-      .transaction("exercise_logs")
-      .objectStore("exercise_logs")
-      .getAll();
-    return new Promise<Array<IExerciseLog>>((resolve, reject) => {
-      request.onsuccess = () => {
-        resolve(request.result);
+  public async listTable<T>(table: Table) {
+    const db = await this.connect();
+    const query = db.transaction(table).objectStore(table).getAll();
+    return new Promise<Array<T>>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve(query.result);
+      };
+      query.onerror = (event) => {
+        console.error("failed to list table ", event);
+        reject(event);
       };
     });
   }
-  public async addExercise(data: { name: string; description: string }) {
-    await this.connect();
-    const store = this.db
-      .transaction("exercises", "readwrite")
-      .objectStore("exercises");
-    store.put(data);
+
+  public async getByIndex<T extends { id: string }>(
+    table: Table,
+    indexName: string,
+    value: string | string[]
+  ) {
+    const db = await this.connect();
+    const index = db.transaction(table).objectStore(table).index(indexName);
+    const query = index.get(value);
+
+    return new Promise<T>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve(query.result);
+      };
+      query.onerror = (event) => {
+        console.error("failed to list table ", event);
+        reject(event);
+      };
+    });
   }
 
-  public async deleteExercise(name: string, onSuccess: () => void) {
-    await this.connect();
+  public async putRow<T extends { id: string }>(table: Table, data: T) {
+    const db = await this.connect();
+    const store = db.transaction(table, "readwrite").objectStore(table);
 
-    const request = this.db
-      .transaction("exercises", "readwrite")
-      .objectStore("exercises")
-      .delete(name);
-    request.onsuccess = (event) => {
-      onSuccess();
-    };
+    const query = store.put(data);
+    return new Promise<WithId<T>>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve(data);
+      };
+      query.onerror = (event) => {
+        console.error("failed to put row", event, data);
+        reject(event);
+      };
+    });
+  }
+
+  public async deleteRow(table: Table, id: string) {
+    const db = await this.connect();
+
+    const query = db
+      .transaction(table, "readwrite")
+      .objectStore(table)
+      .delete(id);
+
+    return new Promise<void>((resolve, reject) => {
+      query.onsuccess = () => {
+        resolve();
+      };
+      query.onerror = (event) => {
+        console.error("failed to delte row", event);
+        reject(event);
+      };
+    });
   }
 }

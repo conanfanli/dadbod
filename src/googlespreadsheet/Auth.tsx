@@ -1,8 +1,8 @@
 import * as React from "react";
 import { TextField, Button } from "@mui/material";
 import { StateTable } from "./StateTable";
-import { DbClient } from "../indexeddb/client";
 import { getSheetService } from "./service";
+import { getEventService } from "../indexeddb/service";
 
 const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
 
@@ -54,11 +54,10 @@ export function Authorize() {
         variant="contained"
         fullWidth
         onClick={async () => {
-          const dbClient = new DbClient();
-          await dbClient.connect();
+          const service = getEventService();
           await sheetService.saveState(
             sheetId,
-            JSON.stringify(await dbClient.getState())
+            JSON.stringify(await service.getState())
           );
         }}
         disabled={!hasConsent || !sheetId}

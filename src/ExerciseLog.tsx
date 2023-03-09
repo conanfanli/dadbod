@@ -1,32 +1,32 @@
-import Remove from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
+import Remove from "@mui/icons-material/Remove";
 import {
-  Collapse,
   Box,
-  TextField,
+  Collapse,
+  IconButton,
   ListItem,
   ListItemIcon,
-  IconButton,
+  TextField,
 } from "@mui/material";
 import React from "react";
-import type { IExercise, ISet } from "./types";
-import { DbClient } from "./indexeddb/client";
+import { getEventService } from "./indexeddb/service";
+import type { IExercise, ISet, WithId } from "./types";
 
 const today = new Date().toLocaleDateString();
 
-export function ExerciseLog({ row }: { row: IExercise }) {
+export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
   console.log("render exercise log ...");
-  const client = React.useMemo(() => new DbClient(), []);
+  const service = React.useMemo(() => getEventService(), []);
 
   const [sets, setSets] = React.useState<ISet[]>([]);
 
   React.useEffect(() => {
     async function fetchData() {
-      const logs = await client.listLogs();
-      setSets(logs.find((log) => log.exerciseName === row.name)?.sets || []);
+      const logs = await service.listLogs();
+      setSets(logs.find((log) => log.exerciseId === row.id)?.sets || []);
     }
     fetchData();
-  }, [client, row.name]);
+  }, [service, row.id]);
 
   const setsWithNewRow =
     sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
@@ -37,9 +37,9 @@ export function ExerciseLog({ row }: { row: IExercise }) {
     });
     setSets(newSets);
 
-    client.logExercise({
+    service.logExercise({
       date: today,
-      exerciseName: row.name,
+      exerciseId: row.id,
       sets: newSets,
     });
   }
@@ -76,9 +76,9 @@ export function ExerciseLog({ row }: { row: IExercise }) {
             onClick={() => {
               const newSets = sets.slice(0, sets.length - 1);
               setSets(newSets);
-              client.logExercise({
+              service.logExercise({
                 date: today,
-                exerciseName: row.name,
+                exerciseId: row.id,
                 sets: newSets,
               });
             }}

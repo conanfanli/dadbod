@@ -3,9 +3,13 @@ export interface IExercise {
   description: string;
 }
 
+export type WithId<T> = {
+  [P in keyof T]: T[P];
+} & { id: string };
+
 export interface IExerciseLog {
   date: string;
-  exerciseName: string;
+  exerciseId: string;
   sets: Array<ISet>;
 }
 
