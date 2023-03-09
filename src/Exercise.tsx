@@ -11,6 +11,7 @@ import { AddExerciseForm } from "./AddExerciseForm";
 import { ExerciseLog } from "./ExerciseLog";
 import { WithId, IExercise } from "./types";
 import { getEventService } from "./indexeddb/service";
+import { ExercisePageBottomNavigation } from "./ExercisePageBottomNavigation";
 
 export function Exercises() {
   const service = React.useMemo(() => getEventService(), []);
@@ -39,6 +40,7 @@ export function Exercises() {
         }}
       />
       <ExerciseList exercises={exercises} deleteExercise={deleteExercise} />
+      <ExercisePageBottomNavigation />
     </div>
   );
 }
