@@ -23,6 +23,10 @@ const ACTIONS = [
   "create-exercise",
   "update-exercise",
   "delete-exercise",
+
+  "create-exercise-log",
+  "update-exercise-log",
+
   "upload-state",
 ] as const;
 
@@ -31,4 +35,5 @@ export interface IEvent {
   action: ActionType;
   entityId: string;
   createdAt: string;
+  payload: {};
 }

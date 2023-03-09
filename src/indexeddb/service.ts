@@ -13,11 +13,11 @@ export interface IEventService {
   getState(): Promise<DbState>;
   getConnectedSheetName(): Promise<string>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
+  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
   getExerciseSets(filter: {
     date: string;
     exerciseId: string;
   }): Promise<Array<IExerciseLog>>;
-  logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
 }
 
 class EventService implements IEventService {
@@ -48,18 +48,53 @@ class EventService implements IEventService {
     return { exercises, exerciseLogs };
   }
 
+  // TODO: split create and update
   public async logExercise(data: IExerciseLog) {
     let existing = await this.db.exerciseLogs.get({
       date: data.date,
       exerciseId: data.exerciseId,
     });
 
+    /*
     const log = {
       id: existing ? existing.id : uuidv4(),
       ...data,
     };
     await this.db.exerciseLogs.put(log, log.id);
     return log;
+    */
+
+    return this.db.transaction(
+      "rw",
+      this.db.exerciseLogs,
+      this.db.events,
+      async () => {
+        const log = {
+          id: existing ? existing.id : uuidv4(),
+          ...data,
+        };
+        await this.db.exerciseLogs.put(log);
+        if (!existing) {
+          await this.db.events.add({
+            id: uuidv4(),
+            action: "create-exercise-log",
+            createdAt: new Date().toISOString(),
+            payload: log,
+            entityId: log.id,
+          });
+        } else {
+          await this.db.events.add({
+            id: uuidv4(),
+            action: "update-exercise-log",
+            createdAt: new Date().toISOString(),
+            payload: log,
+            entityId: log.id,
+          });
+        }
+
+        return log;
+      }
+    );
   }
   public async createExercise(data: IExercise) {
     return this.db.transaction(
@@ -74,6 +109,7 @@ class EventService implements IEventService {
           action: "create-exercise",
           createdAt: new Date().toISOString(),
           entityId: item.id,
+          payload: item,
         });
         return item;
       }
@@ -86,12 +122,14 @@ class EventService implements IEventService {
       this.db.exercises,
       this.db.events,
       async () => {
+        const existing = this.db.exercises.get(id);
         await this.db.exercises.delete(id);
         await this.db.events.add({
           id: uuidv4(),
           action: "delete-exercise",
           createdAt: new Date().toISOString(),
           entityId: id,
+          payload: existing,
         });
       }
     );
