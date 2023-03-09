@@ -29,6 +29,7 @@ export class DbClient extends Dexie {
     const exercises = await this.exercises.toArray();
     const exerciseLogs = await this.exerciseLogs.toArray();
     const events = await this.events.toArray();
+    // Fix date
     return { exercises, exerciseLogs, events, date: new Date().toISOString() };
   }
 }

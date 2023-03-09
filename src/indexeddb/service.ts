@@ -32,7 +32,7 @@ class EventService implements IEventService {
       (await this.db.events.orderBy("createdAt").last())!.createdAt
     );
     const remoteState = await this.ss.getLatestState();
-    const remoteTimeStamp = new Date(remoteState!.date);
+    const remoteTimeStamp = new Date(remoteState?.date || "2000-10-10");
 
     console.log("local ", localTimestamp, "remote ", remoteTimeStamp);
     const timeDiff = localTimestamp.getTime() - remoteTimeStamp.getTime();
@@ -41,8 +41,11 @@ class EventService implements IEventService {
   }
   public async syncState(): Promise<void> {
     const timeDiff = await this.getStateDiff();
-
-    console.log(timeDiff);
+    if (timeDiff > 0) {
+      const localState = await this.db.serialize();
+      console.log("saving local state", localState);
+      this.ss.saveState(JSON.stringify(localState));
+    }
   }
 
   public async getConnectedSheetName(): Promise<string> {
