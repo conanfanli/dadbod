@@ -12,6 +12,7 @@ export interface IEventService {
     exerciseId: string;
   }): Promise<Array<IExerciseLog>>;
   getState(): Promise<DbState>;
+  getStateDiff(): Promise<number>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
   logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
   syncState(): Promise<void>;
@@ -26,11 +27,22 @@ class EventService implements IEventService {
     this.ss = getSheetService();
   }
 
+  public async getStateDiff(): Promise<number> {
+    const localTimestamp = new Date(
+      (await this.db.events.orderBy("createdAt").last())!.createdAt
+    );
+    const remoteState = await this.ss.getLatestState();
+    const remoteTimeStamp = new Date(remoteState!.date);
+
+    console.log("local ", localTimestamp, "remote ", remoteTimeStamp);
+    const timeDiff = localTimestamp.getTime() - remoteTimeStamp.getTime();
+
+    return timeDiff;
+  }
   public async syncState(): Promise<void> {
-    const lastEvent = await this.db.events.orderBy("createdAt").last();
-    const latestRow = await this.ss.getLatestState();
-    console.log(lastEvent);
-    console.log(latestRow);
+    const timeDiff = await this.getStateDiff();
+
+    console.log(timeDiff);
   }
 
   public async getConnectedSheetName(): Promise<string> {

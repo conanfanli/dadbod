@@ -9,6 +9,7 @@ export function ExercisePageBottomNavigation() {
   console.log("render bottom");
   const service = React.useMemo(() => getEventService(), []);
   const [connected, setConnected] = React.useState("");
+  const [stateDiff, setStateDiff] = React.useState(0);
 
   const navigate = useNavigate();
 
@@ -16,6 +17,8 @@ export function ExercisePageBottomNavigation() {
     const fetchData = async () => {
       const connectedSheetName = await service.getConnectedSheetName();
       setConnected(connectedSheetName);
+      const stateDiff = await service.getStateDiff();
+      setStateDiff(stateDiff);
     };
 
     fetchData();
@@ -41,7 +44,11 @@ export function ExercisePageBottomNavigation() {
           }
         ></BottomNavigationAction>
         <BottomNavigationAction
-          label="last synced"
+          label={
+            stateDiff
+              ? `${Number(stateDiff / 1000 / 60).toFixed(0)} minutes`
+              : "in sync"
+          }
           icon={<CloudSync color="primary" />}
           onClick={() => service.syncState()}
         ></BottomNavigationAction>
