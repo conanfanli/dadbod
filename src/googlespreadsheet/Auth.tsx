@@ -4,8 +4,6 @@ import { StateTable } from "./StateTable";
 import { getSheetService } from "./service";
 import { getEventService } from "../indexeddb/service";
 
-const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
-
 export function Authorize() {
   console.log("Render authorize");
 
@@ -36,7 +34,7 @@ export function Authorize() {
         defaultValue={sheetService.sheetId}
         onChange={(event) => {
           setSheetId(event.target.value);
-          localStorage.setItem("spreadsheet_id", event.target.value);
+          sheetService.sheetId = event.target.value;
         }}
       />
       <Button

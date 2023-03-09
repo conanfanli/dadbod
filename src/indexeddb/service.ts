@@ -11,7 +11,7 @@ export interface IEventService {
   createExercise(data: IExercise): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
   getState(): Promise<DbState>;
-  isReadyToSync(): Promise<boolean>;
+  getConnectedSheetName(): Promise<string>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
   getExerciseSets(filter: {
     date: string;
@@ -29,8 +29,11 @@ class EventService implements IEventService {
     this.ss = getSheetService();
   }
 
-  public async isReadyToSync(): Promise<boolean> {
-    return this.ss.hasConsent();
+  public async getConnectedSheetName(): Promise<string> {
+    if (!(await this.ss.hasConsent())) {
+      return "";
+    }
+    return this.ss.getSheetName();
   }
 
   public async listExercises() {

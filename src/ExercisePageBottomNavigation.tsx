@@ -4,15 +4,18 @@ import { getEventService } from "./indexeddb/service";
 import CloudSync from "@mui/icons-material/CloudSync";
 import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 export function ExercisePageBottomNavigation() {
   console.log("render bottom");
   const service = React.useMemo(() => getEventService(), []);
-  const [connected, setConnected] = React.useState(false);
+  const [connected, setConnected] = React.useState("");
+
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const ready = await service.isReadyToSync();
-      setConnected(ready);
+      const connectedSheetName = await service.getConnectedSheetName();
+      setConnected(connectedSheetName);
     };
 
     fetchData();
@@ -25,12 +28,15 @@ export function ExercisePageBottomNavigation() {
     >
       <BottomNavigation showLabels>
         <BottomNavigationAction
-          label={connected ? "connected" : "offline"}
+          label={connected ? `${connected}` : "offline"}
           icon={
             connected ? (
-              <PublishedWithChanges color="primary" />
+              <PublishedWithChanges color="success" />
             ) : (
-              <CloudOff color="primary" />
+              <CloudOff
+                color="error"
+                onClick={() => navigate("/spreadsheet/authorize")}
+              />
             )
           }
         ></BottomNavigationAction>
