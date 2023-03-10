@@ -37,6 +37,7 @@ export interface IEvent {
   createdAt: string;
   payload: {};
 }
+
 export interface DbState {
   revision: Date;
   events: Array<WithId<IEvent>>;

@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 
 function getStateDiffLabel(diffInMs: number): string {
   if (!diffInMs) {
-    return "";
+    return "in sync";
   }
 
   const minutes = diffInMs / 1000 / 60;
@@ -21,6 +21,7 @@ function getStateDiffLabel(diffInMs: number): string {
   }
   return `${Number(hours / 24).toFixed(0)} days`;
 }
+
 export function ExercisePageBottomNavigation() {
   console.log("render bottom");
   const service = React.useMemo(() => getEventService(), []);
@@ -62,7 +63,10 @@ export function ExercisePageBottomNavigation() {
         <BottomNavigationAction
           label={getStateDiffLabel(stateDiff)}
           icon={<CloudSync color="primary" />}
-          onClick={() => service.syncState()}
+          onClick={async () => {
+            await service.syncState();
+            setStateDiff(await service.getStateDiff());
+          }}
         ></BottomNavigationAction>
       </BottomNavigation>
     </Paper>
