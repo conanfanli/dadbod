@@ -11,7 +11,10 @@ export interface IEventService {
     date: string;
     exerciseId: string;
   }): Promise<Array<IExerciseLog>>;
-  getState(): Promise<DbState>;
+  getLocalState(): Promise<DbState>;
+  /**
+   * Return the time difference between local state and remote state
+   */
   getStateDiff(): Promise<number>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
   logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
@@ -19,81 +22,80 @@ export interface IEventService {
 }
 
 class EventService implements IEventService {
-  private db: DbClient;
-  private ss: ISheetService;
+  private local: DbClient;
+  private remote: ISheetService;
 
   constructor() {
-    this.db = new DbClient();
-    this.ss = getSheetService();
+    this.local = new DbClient();
+    this.remote = getSheetService();
   }
 
   public async getStateDiff(): Promise<number> {
-    const localTimestamp = new Date(
-      (await this.db.events.orderBy("createdAt").last())!.createdAt
-    );
-    const remoteState = await this.ss.getLatestState();
-    const remoteTimeStamp = new Date(remoteState?.date || "2000-10-10");
+    const localRevision =
+      (await this.local.getRevision()) || new Date("1907-01-01");
+    const remoteState = await this.remote.getLatestState();
+    const remoteRevision = remoteState
+      ? remoteState.revision
+      : new Date("1907-01-01");
 
-    console.log("local ", localTimestamp, "remote ", remoteTimeStamp);
-    const timeDiff = localTimestamp.getTime() - remoteTimeStamp.getTime();
+    console.log("local ", localRevision, "remote ", remoteRevision);
+    const timeDiff = localRevision.getTime() - remoteRevision.getTime();
 
     return timeDiff;
   }
   public async syncState(): Promise<void> {
     const timeDiff = await this.getStateDiff();
     if (timeDiff > 0) {
-      const localState = await this.db.serialize();
-      console.log("saving local state", localState);
-      this.ss.saveState(JSON.stringify(localState));
+      console.log("localState is ahead", timeDiff / 1000);
+      const localState = await this.local.serialize();
+      this.remote.saveState(JSON.stringify(localState));
+    } else if (timeDiff < 0) {
+      console.log("remote is ahead", timeDiff / 1000);
+      const remoteState = await this.remote.getLatestState();
+      if (!remoteState) {
+        throw new Error("no remote state available");
+      }
+      this.local.loadRemoteState(remoteState);
     }
   }
 
   public async getConnectedSheetName(): Promise<string> {
-    if (!(await this.ss.hasConsent())) {
+    if (!(await this.remote.hasConsent())) {
       return "";
     }
-    return this.ss.getSheetName();
+    return this.remote.getSheetName();
   }
 
   public async listExercises() {
-    return this.db.exercises.toArray();
+    return this.local.exercises.toArray();
   }
   public async getExerciseSets(filter: { date: string; exerciseId: string }) {
-    return this.db.exerciseLogs.where(filter).toArray();
+    return this.local.exerciseLogs.where(filter).toArray();
   }
 
-  public async getState() {
-    return this.db.serialize();
+  public async getLocalState() {
+    return this.local.serialize();
   }
 
   // TODO: split create and update
   public async logExercise(data: IExerciseLog) {
-    let existing = await this.db.exerciseLogs.get({
+    let existing = await this.local.exerciseLogs.get({
       date: data.date,
       exerciseId: data.exerciseId,
     });
 
-    /*
-    const log = {
-      id: existing ? existing.id : uuidv4(),
-      ...data,
-    };
-    await this.db.exerciseLogs.put(log, log.id);
-    return log;
-    */
-
-    return this.db.transaction(
+    return this.local.transaction(
       "rw",
-      this.db.exerciseLogs,
-      this.db.events,
+      this.local.exerciseLogs,
+      this.local.events,
       async () => {
         const log = {
           id: existing ? existing.id : uuidv4(),
           ...data,
         };
-        await this.db.exerciseLogs.put(log);
+        await this.local.exerciseLogs.put(log);
         if (!existing) {
-          await this.db.events.add({
+          await this.local.events.add({
             id: uuidv4(),
             action: "create-exercise-log",
             createdAt: new Date().toISOString(),
@@ -101,7 +103,7 @@ class EventService implements IEventService {
             entityId: log.id,
           });
         } else {
-          await this.db.events.add({
+          await this.local.events.add({
             id: uuidv4(),
             action: "update-exercise-log",
             createdAt: new Date().toISOString(),
@@ -115,14 +117,14 @@ class EventService implements IEventService {
     );
   }
   public async createExercise(data: IExercise) {
-    return this.db.transaction(
+    return this.local.transaction(
       "rw",
-      this.db.exercises,
-      this.db.events,
+      this.local.exercises,
+      this.local.events,
       async () => {
         const item = { id: uuidv4(), ...data };
-        await this.db.exercises.add(item);
-        await this.db.events.add({
+        await this.local.exercises.add(item);
+        await this.local.events.add({
           id: uuidv4(),
           action: "create-exercise",
           createdAt: new Date().toISOString(),
@@ -135,14 +137,14 @@ class EventService implements IEventService {
   }
 
   public async deleteExercise(id: string) {
-    return this.db.transaction(
+    return this.local.transaction(
       "rw",
-      this.db.exercises,
-      this.db.events,
+      this.local.exercises,
+      this.local.events,
       async () => {
-        const existing = this.db.exercises.get(id);
-        await this.db.exercises.delete(id);
-        await this.db.events.add({
+        const existing = this.local.exercises.get(id);
+        await this.local.exercises.delete(id);
+        await this.local.events.add({
           id: uuidv4(),
           action: "delete-exercise",
           createdAt: new Date().toISOString(),

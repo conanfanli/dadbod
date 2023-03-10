@@ -5,6 +5,22 @@ import CloudSync from "@mui/icons-material/CloudSync";
 import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+
+function getStateDiffLabel(diffInMs: number): string {
+  if (!diffInMs) {
+    return "";
+  }
+
+  const minutes = diffInMs / 1000 / 60;
+  if (minutes < 60) {
+    return `${Number(minutes).toFixed(0)} minutes`;
+  }
+  const hours = minutes / 60;
+  if (hours < 24) {
+    return `${Number(hours).toFixed(0)} hours`;
+  }
+  return `${Number(hours / 24).toFixed(0)} days`;
+}
 export function ExercisePageBottomNavigation() {
   console.log("render bottom");
   const service = React.useMemo(() => getEventService(), []);
@@ -44,11 +60,7 @@ export function ExercisePageBottomNavigation() {
           }
         ></BottomNavigationAction>
         <BottomNavigationAction
-          label={
-            stateDiff
-              ? `${Number(stateDiff / 1000 / 60).toFixed(0)} minutes`
-              : "in sync"
-          }
+          label={getStateDiffLabel(stateDiff)}
           icon={<CloudSync color="primary" />}
           onClick={() => service.syncState()}
         ></BottomNavigationAction>

@@ -1,6 +1,15 @@
 import type { DbState } from "../types";
 import { ISheetClient, SheetClient } from "./client";
 
+const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z$/;
+function reviver(key, value) {
+  if (typeof value === "string" && dateFormat.test(value)) {
+    return new Date(value);
+  }
+
+  return value;
+}
+
 export interface ISheetService {
   getRows(): Promise<[string, string][] | null>;
   getLatestState(): Promise<DbState | null>;
@@ -28,7 +37,7 @@ class SheetService implements ISheetService {
   public async getLatestState(): Promise<DbState | null> {
     const rows = await this.getRows();
     if (rows && rows.length > 0) {
-      return JSON.parse(rows[rows.length - 1][1]);
+      return JSON.parse(rows[rows.length - 1][1], reviver);
     }
 
     return null;

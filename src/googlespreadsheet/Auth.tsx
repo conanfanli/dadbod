@@ -54,7 +54,7 @@ export function Authorize() {
         onClick={async () => {
           const service = getEventService();
           await sheetService.saveState(
-            JSON.stringify(await service.getState())
+            JSON.stringify(await service.getLocalState())
           );
         }}
         disabled={!hasConsent || !sheetId}

@@ -38,8 +38,8 @@ export interface IEvent {
   payload: {};
 }
 export interface DbState {
-  date: string;
-  events: Array<IEvent>;
-  exerciseLogs: Array<IExerciseLog>;
+  revision: Date;
+  events: Array<WithId<IEvent>>;
+  exerciseLogs: Array<WithId<IExerciseLog>>;
   exercises: Array<WithId<IExercise>>;
 }

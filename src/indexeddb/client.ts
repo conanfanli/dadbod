@@ -30,6 +30,41 @@ export class DbClient extends Dexie {
     const exerciseLogs = await this.exerciseLogs.toArray();
     const events = await this.events.toArray();
     // Fix date
-    return { exercises, exerciseLogs, events, date: new Date().toISOString() };
+    return {
+      exercises,
+      exerciseLogs,
+      events,
+      revision: await this.getRevision(),
+    };
+  }
+
+  public async getRevision(): Promise<Date> {
+    const lastEvent = await this.events.orderBy("createdAt").last();
+    return lastEvent ? new Date(lastEvent.createdAt) : new Date("1907-01-01");
+  }
+
+  public async loadRemoteState(remoteState: DbState) {
+    this.transaction(
+      "rw",
+      this.exercises,
+      this.exerciseLogs,
+      this.events,
+      async () => {
+        await this.exercises.bulkDelete(
+          await this.exercises.toCollection().keys()
+        );
+        await this.exercises.bulkAdd(remoteState.exercises);
+
+        await this.exerciseLogs.bulkDelete(
+          await this.exerciseLogs.toCollection().keys()
+        );
+        await this.exerciseLogs.bulkAdd(remoteState.exerciseLogs);
+
+        await this.events.bulkDelete(await this.events.toCollection().keys());
+        await this.events.bulkAdd(remoteState.events);
+
+        console.log("finished loading remote state");
+      }
+    );
   }
 }
