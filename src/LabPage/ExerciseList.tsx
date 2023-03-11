@@ -19,7 +19,7 @@ export function ExerciseList() {
     useLiveQuery(() => service.listExercises(), [service]) || [];
 
   return (
-    <List sx={{ width: "100%" }}>
+    <List sx={{ width: "100%", mb: "3ch" }}>
       {exercises.map((row, index) => [
         <ListItem key={row.id} disablePadding>
           <ListItemButton onClick={() => setActive(row.id)}>

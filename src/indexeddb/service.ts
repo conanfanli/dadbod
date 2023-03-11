@@ -31,22 +31,17 @@ class EventService implements IEventService {
   }
 
   public async getStateDiff(): Promise<number> {
-    try {
-      const localRevision =
-        (await this.local.getRevision()) || new Date("1907-01-01");
-      const remoteState = await this.remote.getLatestState();
-      const remoteRevision = remoteState
-        ? remoteState.revision
-        : new Date("1907-01-01");
+    const localRevision =
+      (await this.local.getRevision()) || new Date("1907-01-01");
+    const remoteState = await this.remote.getLatestState();
+    const remoteRevision = remoteState
+      ? remoteState.revision
+      : new Date("1907-01-01");
 
-      console.log("local ", localRevision, "remote ", remoteRevision);
-      const timeDiff = localRevision.getTime() - remoteRevision.getTime();
+    console.log("local ", localRevision, "remote ", remoteRevision);
+    const timeDiff = localRevision.getTime() - remoteRevision.getTime();
 
-      return timeDiff;
-    } catch (err) {
-      console.error(err);
-      return 0;
-    }
+    return timeDiff;
   }
   public async syncState(): Promise<void> {
     const timeDiff = await this.getStateDiff();
