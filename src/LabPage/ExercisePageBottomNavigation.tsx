@@ -31,14 +31,12 @@ export function ExercisePageBottomNavigation() {
       elevation={3}
     >
       <Button
+        onClick={() => navigate("/spreadsheet/authorize")}
         endIcon={
           connected ? (
             <PublishedWithChanges color="success" />
           ) : (
-            <CloudOff
-              color="error"
-              onClick={() => navigate("/spreadsheet/authorize")}
-            />
+            <CloudOff color="error" />
           )
         }
       >
