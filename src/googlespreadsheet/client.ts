@@ -103,7 +103,11 @@ export class SheetClient implements ISheetClient {
           scope: this.SCOPES,
           // Will be called after requestAccessToken
           callback: (token) => {
-            this._setToken(token);
+            if (token.access_token) {
+              this._setToken(token);
+            } else {
+              reject(token);
+            }
           },
         });
         resolve();
@@ -131,7 +135,7 @@ export class SheetClient implements ISheetClient {
       } else {
         // Skip display of account chooser and consent dialog for an existing session.
         console.log("live spreadsheet session");
-        this.tokenClient.requestAccessToken({ prompt: "none" });
+        this.tokenClient.requestAccessToken({ prompt: "consent" });
       }
     });
   }
