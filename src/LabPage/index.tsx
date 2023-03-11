@@ -9,8 +9,8 @@ import {
 import * as React from "react";
 import { AddExerciseForm } from "./AddExerciseForm";
 import { ExerciseLog } from "./ExerciseLog";
-import { WithId, IExercise } from "./types";
-import { getEventService } from "./indexeddb/service";
+import { WithId, IExercise } from "../types";
+import { getEventService } from "../indexeddb/service";
 import { ExercisePageBottomNavigation } from "./ExercisePageBottomNavigation";
 import { useLiveQuery } from "dexie-react-hooks";
 

@@ -14,6 +14,8 @@ export interface ISheetClient {
 }
 
 export class SheetClient implements ISheetClient {
+  readonly CLIENT_ID =
+    "405611184091-qr0f2pe92cmb6089o86v2dovkgqgrc93.apps.googleusercontent.com";
   readonly SCOPES = "https://www.googleapis.com/auth/spreadsheets";
   readonly API_KEY = "AIzaSyAsHWHwapoVGOtuD_BEcATNPQpJkSAaYYg";
   readonly DISCOVERY_DOC =
@@ -98,8 +100,7 @@ export class SheetClient implements ISheetClient {
     await new Promise<void>((resolve, reject) => {
       try {
         this.tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id:
-            "405611184091-6od2974ndpvjucgr73ivt1ocmqkv51l6.apps.googleusercontent.com",
+          client_id: this.CLIENT_ID,
           scope: this.SCOPES,
           // Will be called after requestAccessToken
           callback: (token) => {

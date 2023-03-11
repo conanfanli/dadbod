@@ -1,6 +1,6 @@
 import * as React from "react";
 import CloudOff from "@mui/icons-material/CloudOff";
-import { getEventService } from "./indexeddb/service";
+import { getEventService } from "../indexeddb/service";
 import CloudSync from "@mui/icons-material/CloudSync";
 import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";

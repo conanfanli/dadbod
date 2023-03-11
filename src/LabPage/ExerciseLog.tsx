@@ -9,8 +9,8 @@ import {
   TextField,
 } from "@mui/material";
 import React from "react";
-import { getEventService } from "./indexeddb/service";
-import type { IExercise, ISet, WithId } from "./types";
+import { getEventService } from "../indexeddb/service";
+import type { IExercise, ISet, WithId } from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
 
 const today = new Date().toLocaleDateString();
