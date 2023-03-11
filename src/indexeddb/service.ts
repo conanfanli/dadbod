@@ -141,15 +141,17 @@ class EventService implements IEventService {
       "rw",
       this.local.exercises,
       this.local.events,
+      this.local.exerciseLogs,
       async () => {
-        const existing = this.local.exercises.get(id);
+        const existing = await this.local.exercises.get(id);
         await this.local.exercises.delete(id);
+        await this.local.exerciseLogs.where({ exerciseId: id }).delete();
         await this.local.events.add({
           id: uuidv4(),
           action: "delete-exercise",
           createdAt: new Date().toISOString(),
           entityId: id,
-          payload: existing,
+          payload: existing || {},
         });
       }
     );

@@ -9,7 +9,7 @@ import Dexie, { Table as DexieTable } from "dexie";
 
 export class DbClient extends Dexie {
   static readonly DB_NAME = "workout-log";
-  static readonly LATEST_VERSION = 13;
+  static readonly LATEST_VERSION = 14;
 
   exercises!: DexieTable<WithId<IExercise>>;
   exerciseLogs!: DexieTable<WithId<IExerciseLog>>;
@@ -19,7 +19,7 @@ export class DbClient extends Dexie {
     super(DbClient.DB_NAME);
     this.version(DbClient.LATEST_VERSION).stores({
       exercises: "id, &name",
-      exerciseLogs: "id, &[date+exerciseId]",
+      exerciseLogs: "id, &[date+exerciseId], exerciseId",
       events: "id, action, entityId, createdAt",
     });
     console.log("inited db client");
