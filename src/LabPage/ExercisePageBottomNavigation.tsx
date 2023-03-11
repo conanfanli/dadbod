@@ -28,23 +28,12 @@ export function ExercisePageBottomNavigation() {
   console.log("render bottom navigation");
   const service = React.useMemo(() => getEventService(), []);
 
-  const stateDiff = useLiveQuery(() => service.getStateDiff(), [service]) || 0;
-
   return (
     <Paper
       sx={{ position: "fixed", bottom: 1, left: 0, right: 0 }}
       elevation={3}
     >
       <SheetConnectionStatus eventService={service} />
-      <Button
-        endIcon={<CloudSync color="primary" />}
-        onClick={async () => {
-          await service.syncState();
-          window.location.reload();
-        }}
-      >
-        {getStateDiffLabel(stateDiff)}
-      </Button>
     </Paper>
   );
 }
@@ -56,6 +45,8 @@ function SheetConnectionStatus({
 }) {
   console.log("render sheet connection");
   const [connected, setConnected] = React.useState("");
+  const stateDiff =
+    useLiveQuery(async () => eventService.getStateDiff(), [eventService]) || 0;
 
   const navigate = useNavigate();
 
@@ -71,19 +62,32 @@ function SheetConnectionStatus({
 
   console.log(222, connected);
   return (
-    <Button
-      endIcon={
-        connected ? (
-          <PublishedWithChanges color="success" />
-        ) : (
-          <CloudOff
-            color="error"
-            onClick={() => navigate("/spreadsheet/authorize")}
-          />
-        )
-      }
-    >
-      {`${connected ? `${connected}` : "offline"}`}
-    </Button>
+    <div>
+      <Button
+        endIcon={
+          connected ? (
+            <PublishedWithChanges color="success" />
+          ) : (
+            <CloudOff
+              color="error"
+              onClick={() => navigate("/spreadsheet/authorize")}
+            />
+          )
+        }
+      >
+        {`${connected ? `${connected}` : "offline"}`}
+      </Button>
+      {connected ? (
+        <Button
+          endIcon={<CloudSync color="primary" />}
+          onClick={async () => {
+            await eventService.syncState();
+            window.location.reload();
+          }}
+        >
+          {getStateDiffLabel(stateDiff)}
+        </Button>
+      ) : null}
+    </div>
   );
 }

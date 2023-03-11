@@ -31,7 +31,9 @@ class SheetService implements ISheetService {
   private _sheetId: string = "";
   constructor() {
     this.client = new SheetClient();
-    this._sheetId = localStorage.getItem("spreadsheet_id") || "";
+    this._sheetId =
+      localStorage.getItem("spreadsheet_id") ||
+      "14gqCW3IMNf0kqT-c_vOJ2E3f32otLVyq0fn2Ec0EDGU";
   }
 
   public async getLatestState(): Promise<DbState | null> {
