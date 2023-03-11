@@ -14,7 +14,7 @@ import { getEventService } from "./indexeddb/service";
 import { ExercisePageBottomNavigation } from "./ExercisePageBottomNavigation";
 import { useLiveQuery } from "dexie-react-hooks";
 
-export function Exercises() {
+export function LabPage() {
   const service = React.useMemo(() => getEventService(), []);
 
   const exercises =
