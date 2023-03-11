@@ -3,7 +3,12 @@ import CloudOff from "@mui/icons-material/CloudOff";
 import { getEventService } from "../indexeddb/service";
 import CloudSync from "@mui/icons-material/CloudSync";
 import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
-import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
+import {
+  BottomNavigation,
+  BottomNavigationAction,
+  Button,
+  Paper,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { IEventService } from "../indexeddb/service";
@@ -35,17 +40,16 @@ export function ExercisePageBottomNavigation() {
       sx={{ position: "fixed", bottom: 1, left: 0, right: 0 }}
       elevation={3}
     >
-      <BottomNavigation showLabels>
-        <SheetConnectionStatus eventService={service} />
-        <BottomNavigationAction
-          label={getStateDiffLabel(stateDiff)}
-          icon={<CloudSync color="primary" />}
-          onClick={async () => {
-            await service.syncState();
-            window.location.reload();
-          }}
-        ></BottomNavigationAction>
-      </BottomNavigation>
+      <SheetConnectionStatus eventService={service} />
+      <Button
+        endIcon={<CloudSync color="primary" />}
+        onClick={async () => {
+          await service.syncState();
+          window.location.reload();
+        }}
+      >
+        {getStateDiffLabel(stateDiff)}
+      </Button>
     </Paper>
   );
 }
@@ -63,16 +67,17 @@ function SheetConnectionStatus({
   React.useEffect(() => {
     const fetchData = async () => {
       const connectedSheetName = await eventService.getConnectedSheetName();
+      console.log("sheet name is", connectedSheetName);
       setConnected(connectedSheetName);
     };
 
     fetchData();
   }, [eventService]);
 
+  console.log(222, connected);
   return (
-    <BottomNavigationAction
-      label={connected ? `${connected}` : "offline"}
-      icon={
+    <Button
+      endIcon={
         connected ? (
           <PublishedWithChanges color="success" />
         ) : (
@@ -82,6 +87,8 @@ function SheetConnectionStatus({
           />
         )
       }
-    ></BottomNavigationAction>
+    >
+      {`${connected ? `${connected}` : "offline"}`}
+    </Button>
   );
 }
