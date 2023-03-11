@@ -6,6 +6,7 @@ import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
+import { IEventService } from "../indexeddb/service";
 
 function getStateDiffLabel(diffInMs: number): string {
   if (!diffInMs) {
@@ -24,22 +25,10 @@ function getStateDiffLabel(diffInMs: number): string {
 }
 
 export function ExercisePageBottomNavigation() {
-  console.log("render bottom");
+  console.log("render bottom navigation");
   const service = React.useMemo(() => getEventService(), []);
-  const [connected, setConnected] = React.useState("");
-
-  const navigate = useNavigate();
 
   const stateDiff = useLiveQuery(() => service.getStateDiff(), [service]) || 0;
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const connectedSheetName = await service.getConnectedSheetName();
-      setConnected(connectedSheetName);
-    };
-
-    fetchData();
-  }, [service]);
 
   return (
     <Paper
@@ -47,19 +36,7 @@ export function ExercisePageBottomNavigation() {
       elevation={3}
     >
       <BottomNavigation showLabels>
-        <BottomNavigationAction
-          label={connected ? `${connected}` : "offline"}
-          icon={
-            connected ? (
-              <PublishedWithChanges color="success" />
-            ) : (
-              <CloudOff
-                color="error"
-                onClick={() => navigate("/spreadsheet/authorize")}
-              />
-            )
-          }
-        ></BottomNavigationAction>
+        <SheetConnectionStatus eventService={service} />
         <BottomNavigationAction
           label={getStateDiffLabel(stateDiff)}
           icon={<CloudSync color="primary" />}
@@ -70,5 +47,41 @@ export function ExercisePageBottomNavigation() {
         ></BottomNavigationAction>
       </BottomNavigation>
     </Paper>
+  );
+}
+
+function SheetConnectionStatus({
+  eventService,
+}: {
+  eventService: IEventService;
+}) {
+  console.log("render sheet connection");
+  const [connected, setConnected] = React.useState("");
+
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const connectedSheetName = await eventService.getConnectedSheetName();
+      setConnected(connectedSheetName);
+    };
+
+    fetchData();
+  }, [eventService]);
+
+  return (
+    <BottomNavigationAction
+      label={connected ? `${connected}` : "offline"}
+      icon={
+        connected ? (
+          <PublishedWithChanges color="success" />
+        ) : (
+          <CloudOff
+            color="error"
+            onClick={() => navigate("/spreadsheet/authorize")}
+          />
+        )
+      }
+    ></BottomNavigationAction>
   );
 }

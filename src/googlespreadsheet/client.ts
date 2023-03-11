@@ -80,6 +80,7 @@ export class SheetClient implements ISheetClient {
       return;
     }
 
+    console.warn("calling connet");
     await new Promise<void>((resolve, reject) => {
       gapi.load("client", {
         callback: () => {
@@ -142,6 +143,7 @@ export class SheetClient implements ISheetClient {
   }
 
   public async getSheetName(sheetId: string) {
+    console.warn("calling getSheetName ");
     const res = await gapi.client.sheets.spreadsheets.get({
       spreadsheetId: sheetId,
     });
