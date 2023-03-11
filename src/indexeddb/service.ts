@@ -5,6 +5,7 @@ import { getSheetService, ISheetService } from "../googlespreadsheet/service";
 
 export interface IEventService {
   createExercise(data: IExercise): Promise<WithId<IExercise>>;
+  updateExercise(data: WithId<IExercise>): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
   getConnectedSheetName(): Promise<string>;
   getExerciseSets(filter: {
@@ -132,6 +133,24 @@ class EventService implements IEventService {
           payload: item,
         });
         return item;
+      }
+    );
+  }
+  public async updateExercise(data: WithId<IExercise>) {
+    return this.local.transaction(
+      "rw",
+      this.local.exercises,
+      this.local.events,
+      async () => {
+        await this.local.exercises.put(data);
+        await this.local.events.add({
+          id: uuidv4(),
+          action: "update-exercise",
+          createdAt: new Date(),
+          entityId: data.id,
+          payload: data,
+        });
+        return data;
       }
     );
   }

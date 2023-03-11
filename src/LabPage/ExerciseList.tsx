@@ -10,9 +10,11 @@ import * as React from "react";
 import { ExerciseLog } from "./ExerciseLog";
 import { getEventService } from "../indexeddb/service";
 import { useLiveQuery } from "dexie-react-hooks";
+import { AddExerciseForm } from "./AddExerciseForm";
 
 export function ExerciseList() {
-  const [active, setActive] = React.useState("");
+  const [expand, setExpand] = React.useState("");
+  const [editMode, setEditMode] = React.useState("");
 
   const service = React.useMemo(() => getEventService(), []);
   const exercises =
@@ -22,7 +24,7 @@ export function ExerciseList() {
     <List sx={{ width: "100%", mb: "3ch" }}>
       {exercises.map((row, index) => [
         <ListItem key={row.id} disablePadding>
-          <ListItemButton onClick={() => setActive(row.id)}>
+          <ListItemButton onClick={() => setExpand(row.id)}>
             <ListItemText
               key={row.id}
               primary={row.name}
@@ -33,7 +35,12 @@ export function ExerciseList() {
             </IconButton>
           </ListItemButton>
         </ListItem>,
-        active === row.id ? <ExerciseLog key={index} row={row} /> : null,
+        expand === row.id ? <ExerciseLog key={index} row={row} /> : null,
+        editMode === row.id ? (
+          <AddExerciseForm
+            onSubmit={(data) => service.updateExercise({ id: row.id, ...data })}
+          />
+        ) : null,
       ])}
     </List>
   );
