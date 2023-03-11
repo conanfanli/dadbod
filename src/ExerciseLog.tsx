@@ -11,31 +11,38 @@ import {
 import React from "react";
 import { getEventService } from "./indexeddb/service";
 import type { IExercise, ISet, WithId } from "./types";
+import { useLiveQuery } from "dexie-react-hooks";
 
 const today = new Date().toLocaleDateString();
 
 export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
   console.log("render exercise log ...");
   const service = React.useMemo(() => getEventService(), []);
+  const [showNewRow, setShowNewRow] = React.useState(false);
 
-  const [sets, setSets] = React.useState<ISet[]>([]);
+  const sets =
+    useLiveQuery(async () => {
+      const items = await service.getExerciseSets({
+        date: today,
+        exerciseId: row.id,
+      });
+      return items.length > 0 ? items[items.length - 1].sets : [];
+    }, [service]) || [];
 
-  React.useEffect(() => {
-    async function fetchData() {
-      const logs = await service.listLogs();
-      setSets(logs.find((log) => log.exerciseId === row.id)?.sets || []);
-    }
-    fetchData();
-  }, [service, row.id]);
-
-  const setsWithNewRow =
-    sets.length === 0 ? [{ setNumber: 1, weight: 0, reps: 0 }] : sets;
-
-  function putSet(newSet: ISet) {
-    const newSets = setsWithNewRow.map((s, i) => {
-      return i === newSet.setNumber - 1 ? newSet : s;
+  function updateSet(newSet: ISet) {
+    let isNew = true;
+    let newSets = sets.map((s, i) => {
+      if (i === newSet.setNumber - 1) {
+        isNew = false;
+        return newSet;
+      }
+      return s;
     });
-    setSets(newSets);
+
+    if (isNew) {
+      newSets = [...newSets, newSet];
+      setShowNewRow(false);
+    }
 
     service.logExercise({
       date: today,
@@ -43,13 +50,19 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
       sets: newSets,
     });
   }
-  const canAddRow = sets.length !== 0 && sets[sets.length - 1].reps !== 0;
 
   return (
     <Collapse in={true}>
-      {setsWithNewRow.map((s) => {
-        return <SetEntry key={s.setNumber} set={s} putSet={putSet} />;
+      {sets.map((s) => {
+        return <SetEntry key={s.setNumber} set={s} updateSet={updateSet} />;
       })}
+      {showNewRow ? (
+        <SetEntry
+          key={sets.length + 1}
+          set={{ setNumber: sets.length + 1, weight: 0, reps: 0 }}
+          updateSet={updateSet}
+        />
+      ) : null}
       <ListItem
         sx={{
           display: "flex",
@@ -60,14 +73,11 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
         <ListItemIcon>
           <IconButton
             onClick={() => {
-              setSets([
-                ...sets,
-                { setNumber: sets.length + 1, weight: 0, reps: 0 },
-              ]);
+              setShowNewRow(true);
             }}
-            disabled={!canAddRow}
+            disabled={false}
           >
-            <AddIcon color={canAddRow ? "primary" : "disabled"} />
+            <AddIcon color={showNewRow ? "disabled" : "primary"} />
           </IconButton>
         </ListItemIcon>
         <ListItemIcon>
@@ -75,7 +85,6 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
             disabled={!sets || sets.length === 0}
             onClick={() => {
               const newSets = sets.slice(0, sets.length - 1);
-              setSets(newSets);
               service.logExercise({
                 date: today,
                 exerciseId: row.id,
@@ -93,14 +102,14 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
 
 function SetEntry({
   set,
-  putSet,
+  updateSet,
 }: {
   set: ISet;
-  putSet: (newSet: ISet) => void;
+  updateSet: (newSet: ISet) => void;
 }) {
   function onWeightChange(e) {
     const weight = Number(e.target.value);
-    putSet({
+    updateSet({
       setNumber: set.setNumber,
       reps: set.reps,
       weight,
@@ -109,9 +118,10 @@ function SetEntry({
   function onRepsChange(e) {
     const reps = Number(e.target.value);
     if (reps) {
-      putSet({ setNumber: set.setNumber, weight: set.weight, reps });
+      updateSet({ setNumber: set.setNumber, weight: set.weight, reps });
     }
   }
+  const isNew = set.reps === 0 && set.weight === 0;
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap" }}>
       <div>
@@ -124,6 +134,8 @@ function SetEntry({
         />
         <TextField
           label="Weight"
+          focused={isNew ? true : false}
+          color={isNew ? "primary" : "success"}
           value={set.weight || ""}
           onChange={onWeightChange}
           inputProps={{ inputMode: "numeric" }}
@@ -132,6 +144,8 @@ function SetEntry({
         />
         <TextField
           inputProps={{ inputMode: "numeric" }}
+          color={isNew ? "primary" : "success"}
+          focused={isNew ? true : false}
           value={set.reps || ""}
           label="Reps"
           error={set.reps === 0}

@@ -46,13 +46,21 @@ export class SheetClient implements ISheetClient {
       return null;
     }
 
-    if (!gapi.client.getToken() && tokenFromLocalStorage) {
+    if (
+      !gapi.client.getToken() &&
+      tokenFromLocalStorage &&
+      JSON.parse(tokenFromLocalStorage).access_token
+    ) {
       console.log("using token from local storage");
       gapi.client.setToken(JSON.parse(tokenFromLocalStorage));
       return JSON.parse(tokenFromLocalStorage);
     }
 
-    if (gapi.client.getToken() && !tokenFromLocalStorage) {
+    if (
+      gapi.client.getToken() &&
+      (!tokenFromLocalStorage ||
+        !JSON.parse(tokenFromLocalStorage).access_token)
+    ) {
       localStorage.setItem(
         "spreadsheet_token",
         JSON.stringify(gapi.client.getToken())
@@ -119,7 +127,7 @@ export class SheetClient implements ISheetClient {
       if (!this.getToken()) {
         // Prompt the user to select a Google Account and ask for consent to share their data
         // when establishing a new session.
-        this.tokenClient.requestAccessToken({ prompt: "none" });
+        this.tokenClient.requestAccessToken({ prompt: "consent" });
       } else {
         // Skip display of account chooser and consent dialog for an existing session.
         console.log("live spreadsheet session");

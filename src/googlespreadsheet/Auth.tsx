@@ -4,22 +4,20 @@ import { StateTable } from "./StateTable";
 import { getSheetService } from "./service";
 import { getEventService } from "../indexeddb/service";
 
-const defaultSheetId = localStorage.getItem("spreadsheet_id") || "";
-
 export function Authorize() {
   console.log("Render authorize");
 
   const sheetService = React.useMemo(() => getSheetService(), []);
 
   const [hasConsent, setHasConsent] = React.useState(false);
-  const [sheetId, setSheetId] = React.useState(defaultSheetId);
+  const [sheetId, setSheetId] = React.useState(sheetService.sheetId);
   const [sheetName, setSheetName] = React.useState("");
   const [rows, setRows] = React.useState<[string, string][]>([]);
 
   React.useEffect(() => {
     async function authenticate() {
       setHasConsent(await sheetService.hasConsent());
-      setSheetName(await sheetService.getSheetName(sheetId));
+      setSheetName(await sheetService.getSheetName());
     }
 
     authenticate();
@@ -33,10 +31,10 @@ export function Authorize() {
         helperText={`Spreadsheet Name: ${sheetName}`}
         variant="outlined"
         fullWidth
-        defaultValue={defaultSheetId}
+        defaultValue={sheetService.sheetId}
         onChange={(event) => {
           setSheetId(event.target.value);
-          localStorage.setItem("spreadsheet_id", event.target.value);
+          sheetService.sheetId = event.target.value;
         }}
       />
       <Button
@@ -56,8 +54,7 @@ export function Authorize() {
         onClick={async () => {
           const service = getEventService();
           await sheetService.saveState(
-            sheetId,
-            JSON.stringify(await service.getState())
+            JSON.stringify(await service.getLocalState())
           );
         }}
         disabled={!hasConsent || !sheetId}
@@ -68,8 +65,8 @@ export function Authorize() {
         variant="contained"
         fullWidth
         onClick={async () => {
-          setSheetName(await sheetService.getSheetName(sheetId));
-          const rows = (await sheetService.getRows(sheetId)) || [];
+          setSheetName(await sheetService.getSheetName());
+          const rows = (await sheetService.getRows()) || [];
           setRows(rows);
         }}
         disabled={!hasConsent || !sheetId}

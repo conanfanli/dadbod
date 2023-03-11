@@ -1,22 +1,55 @@
+import type { DbState } from "../types";
 import { ISheetClient, SheetClient } from "./client";
 
+const dateFormat = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z$/;
+function reviver(key, value) {
+  if (typeof value === "string" && dateFormat.test(value)) {
+    return new Date(value);
+  }
+
+  return value;
+}
+
 export interface ISheetService {
-  getRows(sheeId: string): Promise<[string, string][] | null>;
-  getSheetName(sheetId: string): Promise<string>;
+  getRows(): Promise<[string, string][] | null>;
+  getLatestState(): Promise<DbState | null>;
+  getSheetName(): Promise<string>;
   hasConsent(): Promise<boolean>;
   promptConcent(): Promise<void>;
+  sheetId: string;
 
   /**
    * Backup entire DB state to spreadsheet
    */
   saveState(
-    sheetId: string,
     jsonState: string
   ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
 }
 
 class SheetService implements ISheetService {
   private client: ISheetClient;
+  private _sheetId: string = "";
+  constructor() {
+    this.client = new SheetClient();
+    this._sheetId = localStorage.getItem("spreadsheet_id") || "";
+  }
+
+  public async getLatestState(): Promise<DbState | null> {
+    const rows = await this.getRows();
+    if (rows && rows.length > 0) {
+      return JSON.parse(rows[rows.length - 1][1], reviver);
+    }
+
+    return null;
+  }
+
+  public get sheetId() {
+    return this._sheetId;
+  }
+  public set sheetId(v: string) {
+    this._sheetId = v;
+    localStorage.setItem("spreadsheet_id", v);
+  }
 
   public async hasConsent() {
     await this.client.connect();
@@ -27,17 +60,12 @@ class SheetService implements ISheetService {
     return await this.client.promptConcent();
   }
 
-  constructor() {
-    this.client = new SheetClient();
-  }
-
-  private async _handle401<T>(apiPromise: Promise<T>): Promise<T> {
+  private async _promptConsentOn401<T>(apiPromise: Promise<T>): Promise<T> {
     await this.client.connect();
     try {
       return await apiPromise;
     } catch (err: any) {
-      console.log(222, err);
-      if (err.result.error.code === 401) {
+      if (err?.result?.error?.code === 401) {
         await this.client.promptConcent();
         return await apiPromise;
       }
@@ -45,18 +73,22 @@ class SheetService implements ISheetService {
       throw err;
     }
   }
-  public async saveState(sheetId: string, jsonState: string) {
-    return this._handle401(
-      this.client.addRow(sheetId, [new Date().toISOString(), jsonState])
+  public async saveState(jsonState: string) {
+    return this._promptConsentOn401(
+      this.client.addRow(this.sheetId, [new Date().toISOString(), jsonState])
     );
   }
 
-  public async getSheetName(sheetId: string): Promise<string> {
-    return this._handle401(this.client.getSheetName(sheetId));
+  public async getSheetName(): Promise<string> {
+    if (!this._sheetId) {
+      return "";
+    }
+    await this.client.connect();
+    return this._promptConsentOn401(this.client.getSheetName(this.sheetId));
   }
 
-  public async getRows(sheetId: string) {
-    return this._handle401(this.client.getRows(sheetId));
+  public async getRows() {
+    return this._promptConsentOn401(this.client.getRows(this.sheetId));
   }
 }
 
