@@ -35,6 +35,7 @@ class SheetService implements ISheetService {
   }
 
   public async getLatestState(): Promise<DbState | null> {
+    await this.client.connect();
     const rows = await this.getRows();
     if (rows && rows.length > 0) {
       return JSON.parse(rows[rows.length - 1][1], reviver);

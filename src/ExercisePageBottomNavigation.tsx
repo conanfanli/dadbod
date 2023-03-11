@@ -5,6 +5,7 @@ import CloudSync from "@mui/icons-material/CloudSync";
 import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
 import { BottomNavigation, BottomNavigationAction, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useLiveQuery } from "dexie-react-hooks";
 
 function getStateDiffLabel(diffInMs: number): string {
   if (!diffInMs) {
@@ -26,16 +27,15 @@ export function ExercisePageBottomNavigation() {
   console.log("render bottom");
   const service = React.useMemo(() => getEventService(), []);
   const [connected, setConnected] = React.useState("");
-  const [stateDiff, setStateDiff] = React.useState(0);
 
   const navigate = useNavigate();
+
+  const stateDiff = useLiveQuery(() => service.getStateDiff(), [service]) || 0;
 
   React.useEffect(() => {
     const fetchData = async () => {
       const connectedSheetName = await service.getConnectedSheetName();
       setConnected(connectedSheetName);
-      const stateDiff = await service.getStateDiff();
-      setStateDiff(stateDiff);
     };
 
     fetchData();
@@ -65,7 +65,7 @@ export function ExercisePageBottomNavigation() {
           icon={<CloudSync color="primary" />}
           onClick={async () => {
             await service.syncState();
-            setStateDiff(await service.getStateDiff());
+            window.location.reload();
           }}
         ></BottomNavigationAction>
       </BottomNavigation>
