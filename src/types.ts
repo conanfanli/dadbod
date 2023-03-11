@@ -34,7 +34,7 @@ export type ActionType = (typeof ACTIONS)[number];
 export interface IEvent {
   action: ActionType;
   entityId: string;
-  createdAt: string;
+  createdAt: Date;
   payload: {};
 }
 

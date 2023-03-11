@@ -98,7 +98,7 @@ class EventService implements IEventService {
           await this.local.events.add({
             id: uuidv4(),
             action: "create-exercise-log",
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
             payload: log,
             entityId: log.id,
           });
@@ -106,7 +106,7 @@ class EventService implements IEventService {
           await this.local.events.add({
             id: uuidv4(),
             action: "update-exercise-log",
-            createdAt: new Date().toISOString(),
+            createdAt: new Date(),
             payload: log,
             entityId: log.id,
           });
@@ -127,7 +127,7 @@ class EventService implements IEventService {
         await this.local.events.add({
           id: uuidv4(),
           action: "create-exercise",
-          createdAt: new Date().toISOString(),
+          createdAt: new Date(),
           entityId: item.id,
           payload: item,
         });
@@ -149,7 +149,7 @@ class EventService implements IEventService {
         await this.local.events.add({
           id: uuidv4(),
           action: "delete-exercise",
-          createdAt: new Date().toISOString(),
+          createdAt: new Date(),
           entityId: id,
           payload: existing || {},
         });
