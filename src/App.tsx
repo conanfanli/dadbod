@@ -29,7 +29,7 @@ const router = createBrowserRouter(
       element: <Authorize />,
     },
   ],
-  { basename: "/workout-log" }
+  { basename: "/dadbod" }
 );
 
 function App() {

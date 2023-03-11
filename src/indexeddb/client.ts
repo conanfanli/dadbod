@@ -8,7 +8,7 @@ import type {
 import Dexie, { Table as DexieTable } from "dexie";
 
 export class DbClient extends Dexie {
-  static readonly DB_NAME = "workout-log";
+  static readonly DB_NAME = "dadbod";
   static readonly LATEST_VERSION = 14;
 
   exercises!: DexieTable<WithId<IExercise>>;
