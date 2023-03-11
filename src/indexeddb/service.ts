@@ -48,14 +48,14 @@ class EventService implements IEventService {
     if (timeDiff > 0) {
       console.log("localState is ahead", timeDiff / 1000);
       const localState = await this.local.serialize();
-      this.remote.saveState(JSON.stringify(localState));
+      await this.remote.saveState(JSON.stringify(localState));
     } else if (timeDiff < 0) {
       console.log("remote is ahead", timeDiff / 1000);
       const remoteState = await this.remote.getLatestState();
       if (!remoteState) {
         throw new Error("no remote state available");
       }
-      this.local.loadRemoteState(remoteState);
+      await this.local.loadRemoteState(remoteState);
     }
   }
 
