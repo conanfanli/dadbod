@@ -6,6 +6,7 @@ import { getSheetService, ISheetService } from "../googlespreadsheet/service";
 export interface IEventService {
   createExercise(data: IExercise): Promise<WithId<IExercise>>;
   updateExercise(data: WithId<IExercise>): Promise<WithId<IExercise>>;
+  getExercise(id: string): Promise<WithId<IExercise>>;
   deleteExercise(name: string): Promise<void>;
   getConnectedSheetName(): Promise<string>;
   getExerciseSets(filter: {
@@ -31,6 +32,14 @@ class EventService implements IEventService {
     this.remote = getSheetService();
   }
 
+  public async getExercise(id: string): Promise<WithId<IExercise>> {
+    const ret = await this.local.exercises.get(id);
+    if (!ret) {
+      throw new Error(`cannot find exercise with id = ${id}`);
+    }
+
+    return ret;
+  }
   public async getStateDiff(): Promise<number> {
     const localRevision =
       (await this.local.getRevision()) || new Date("1907-01-01");
