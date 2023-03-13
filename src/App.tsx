@@ -3,7 +3,7 @@ import { Authorize } from "./googlespreadsheet/Auth";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { LabPage } from "./LabPage";
 import { ExerciseEditForm } from "./LabPage/ExerciseEditForm";
-import { ExercisePageBottomNavigation } from "./LabPage/ExercisePageBottomNavigation";
+import { Footer } from "./Footer";
 
 function Root() {
   return (
@@ -11,7 +11,7 @@ function Root() {
       <div id="detail">
         <Outlet />
       </div>
-      <ExercisePageBottomNavigation />
+      <Footer />
     </>
   );
 }
