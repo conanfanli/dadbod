@@ -1,4 +1,5 @@
-import Delete from "@mui/icons-material/Delete";
+import Edit from "@mui/icons-material/Edit";
+import { useNavigate } from "react-router-dom";
 import {
   IconButton,
   List,
@@ -10,9 +11,10 @@ import * as React from "react";
 import { ExerciseLog } from "./ExerciseLog";
 import { getEventService } from "../indexeddb/service";
 import { useLiveQuery } from "dexie-react-hooks";
+import { WithId, IExercise } from "../types";
 
 export function ExerciseList() {
-  const [active, setActive] = React.useState("");
+  const [expand, setExpand] = React.useState("");
 
   const service = React.useMemo(() => getEventService(), []);
   const exercises =
@@ -20,21 +22,40 @@ export function ExerciseList() {
 
   return (
     <List sx={{ width: "100%", mb: "3ch" }}>
-      {exercises.map((row, index) => [
-        <ListItem key={row.id} disablePadding>
-          <ListItemButton onClick={() => setActive(row.id)}>
-            <ListItemText
-              key={row.id}
-              primary={row.name}
-              secondary={row.description}
-            />
-            <IconButton onClick={() => service.deleteExercise(row.id)}>
-              <Delete color="secondary" />
-            </IconButton>
-          </ListItemButton>
-        </ListItem>,
-        active === row.id ? <ExerciseLog key={index} row={row} /> : null,
+      {exercises.map((exercise, index) => [
+        <ExerciseListItem
+          key={exercise.id}
+          exercise={exercise}
+          setExpand={setExpand}
+        />,
+        expand === exercise.id ? (
+          <ExerciseLog key={index} exercise={exercise} />
+        ) : null,
       ])}
     </List>
+  );
+}
+
+function ExerciseListItem({
+  exercise,
+  setExpand,
+}: {
+  exercise: WithId<IExercise>;
+  setExpand: (id: string) => void;
+}) {
+  const navigate = useNavigate();
+  return (
+    <ListItem key={exercise.id} disablePadding>
+      <ListItemButton onClick={() => setExpand(exercise.id)}>
+        <ListItemText
+          key={exercise.id}
+          primary={exercise.name}
+          secondary={exercise.description}
+        />
+        <IconButton onClick={() => navigate(`/exercises/${exercise.id}`)}>
+          <Edit />
+        </IconButton>
+      </ListItemButton>
+    </ListItem>
   );
 }

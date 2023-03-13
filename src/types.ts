@@ -1,6 +1,7 @@
 export interface IExercise {
   name: string;
   description: string;
+  oneRepMax?: string;
 }
 
 export type WithId<T> = {

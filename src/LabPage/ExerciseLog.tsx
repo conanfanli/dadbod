@@ -9,7 +9,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 const today = new Date().toLocaleDateString();
 
-export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
+export function ExerciseLog({ exercise }: { exercise: WithId<IExercise> }) {
   console.log("render exercise log ...");
   const service = React.useMemo(() => getEventService(), []);
   const [showNewRow, setShowNewRow] = React.useState(false);
@@ -18,7 +18,7 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
     useLiveQuery(async () => {
       const items = await service.getExerciseSets({
         date: today,
-        exerciseId: row.id,
+        exerciseId: exercise.id,
       });
       return items.length > 0 ? items[items.length - 1].sets : [];
     }, [service]) || [];
@@ -40,7 +40,7 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
 
     service.logExercise({
       date: today,
-      exerciseId: row.id,
+      exerciseId: exercise.id,
       sets: newSets,
     });
   }
@@ -81,7 +81,7 @@ export function ExerciseLog({ row }: { row: WithId<IExercise> }) {
               const newSets = sets.slice(0, sets.length - 1);
               service.logExercise({
                 date: today,
-                exerciseId: row.id,
+                exerciseId: exercise.id,
                 sets: newSets,
               });
             }}
