@@ -1,4 +1,3 @@
-import Delete from "@mui/icons-material/Delete";
 import Edit from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
 import {
@@ -12,7 +11,6 @@ import * as React from "react";
 import { ExerciseLog } from "./ExerciseLog";
 import { getEventService } from "../indexeddb/service";
 import { useLiveQuery } from "dexie-react-hooks";
-import { ExerciseEditForm } from "./ExerciseEditForm";
 import { WithId, IExercise } from "../types";
 
 export function ExerciseList() {
