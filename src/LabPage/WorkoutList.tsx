@@ -1,5 +1,6 @@
 import Edit from "@mui/icons-material/Edit";
 import { useNavigate } from "react-router-dom";
+import { v4 as uuidv4 } from "uuid";
 import {
   Button,
   IconButton,
@@ -11,7 +12,7 @@ import {
 import * as React from "react";
 import { getEventService } from "../indexeddb/service";
 import { useLiveQuery } from "dexie-react-hooks";
-import { WithId, IExercise } from "../types";
+import { WithId, IWorkout } from "../types";
 
 export function WorkoutList() {
   const [expand, setExpand] = React.useState("");
@@ -22,13 +23,13 @@ export function WorkoutList() {
 
   return (
     <List sx={{ width: "100%", mb: "3ch" }}>
-      {workouts.map((exercise, index) => [
-        <Workout key={exercise.id} exercise={exercise} setExpand={setExpand} />,
+      {workouts.map((workout, _) => [
+        <Workout key={workout.id} workout={workout} setExpand={setExpand} />,
       ])}
       <Button
         variant="outlined"
         fullWidth
-        onClick={() => navigate("/workouts/new")}
+        onClick={() => navigate(`/workouts/${uuidv4()}`)}
       >
         add a new workout
       </Button>
@@ -37,22 +38,22 @@ export function WorkoutList() {
 }
 
 function Workout({
-  exercise,
+  workout,
   setExpand,
 }: {
-  exercise: WithId<IExercise>;
+  workout: WithId<IWorkout>;
   setExpand: (id: string) => void;
 }) {
   const navigate = useNavigate();
   return (
-    <ListItem key={exercise.id} disablePadding>
-      <ListItemButton onClick={() => setExpand(exercise.id)}>
+    <ListItem key={workout.id} disablePadding>
+      <ListItemButton onClick={() => setExpand(workout.id)}>
         <ListItemText
-          key={exercise.id}
-          primary={exercise.name}
-          secondary={`Best: ${exercise.oneRepMax}`}
+          key={workout.id}
+          primary={workout.name ? workout.name : workout.date}
+          secondary={workout.description}
         />
-        <IconButton onClick={() => navigate(`/workouts/${exercise.id}`)}>
+        <IconButton onClick={() => navigate(`/workouts/${workout.id}`)}>
           <Edit />
         </IconButton>
       </ListItemButton>

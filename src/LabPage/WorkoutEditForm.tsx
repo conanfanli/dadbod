@@ -5,6 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
 import { useParams } from "react-router-dom";
 import { BackButton } from "../BackButton";
+import { getIsoDate } from "../util";
 
 export function WorkoutEditForm() {
   const { workoutId } = useParams();
@@ -15,19 +16,19 @@ export function WorkoutEditForm() {
     [service]
   );
 
-  if (!results) {
-    return <div>oops</div>;
-  }
-  if (results.length === 0 && workoutId === "new") {
-    return <div>add new</div>;
-  }
-
-  const workout = results[0];
-  if (!workout) {
-    return <div>cannot find workout</div>;
-  }
+  const workout =
+    results && results.length > 0
+      ? results[0]
+      : {
+          id: workoutId,
+          date: getIsoDate(),
+          name: "",
+          description: "",
+          exerciseIds: [],
+        };
 
   function onPatch(name: string, value: string) {
+    console.log("xxxx");
     service.updateWorkout({
       ...(workout as WithId<IWorkout>),
       [name]: value,
@@ -44,7 +45,6 @@ export function WorkoutEditForm() {
           onPatch={onPatch}
         />
       </div>
-      <BackButton />
     </Box>
   );
 }
