@@ -50,7 +50,7 @@ function ExerciseListItem({
         <ListItemText
           key={exercise.id}
           primary={exercise.name}
-          secondary={exercise.description}
+          secondary={`Best: ${exercise.oneRepMax}`}
         />
         <IconButton onClick={() => navigate(`/exercises/${exercise.id}`)}>
           <Edit />
