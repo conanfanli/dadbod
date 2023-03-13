@@ -5,7 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
 import { useParams } from "react-router-dom";
 import { getIsoDate } from "../util";
-import { ExerciseList } from "./ExerciseList";
+import { ExercisePickList } from "./ExercisePickList";
 
 export function WorkoutEditForm() {
   const { workoutId } = useParams();
@@ -43,7 +43,7 @@ export function WorkoutEditForm() {
           value={workout.description}
           onPatch={onPatch}
         />
-        <ExerciseList />
+        <ExercisePickList />
       </div>
     </Box>
   );
