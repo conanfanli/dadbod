@@ -1,12 +1,11 @@
-import * as React from "react";
 import CloudOff from "@mui/icons-material/CloudOff";
-import { getEventService } from "./indexeddb/service";
 import CloudSync from "@mui/icons-material/CloudSync";
 import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
 import { Button, Paper } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
-import { IEventService } from "./indexeddb/service";
+import * as React from "react";
+import { useNavigate } from "react-router-dom";
+import { getEventService, IEventService } from "./indexeddb/service";
 
 export function Footer() {
   console.log("render bottom navigation");

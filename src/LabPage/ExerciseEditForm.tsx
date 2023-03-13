@@ -4,6 +4,7 @@ import { IExercise, WithId } from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
 import { useParams } from "react-router-dom";
+import { BackButton } from "../BackButton";
 
 export function ExerciseEditForm() {
   const { exerciseId } = useParams();
@@ -17,37 +18,51 @@ export function ExerciseEditForm() {
   if (!exercise) {
     return <div>cannot find exercise</div>;
   }
+
+  function onPatch(name: string, value: string) {
+    service.updateExercise({
+      ...(exercise as WithId<IExercise>),
+      [name]: value,
+    });
+  }
   return (
     <Box noValidate component="form">
       <div>
-        <TextField
-          error={exercise.name === ""}
-          onChange={(e) => {
-            service.updateExercise({
-              ...exercise,
-              name: e.target.value,
-            });
-          }}
-          variant="filled"
-          value={exercise.name}
-          fullWidth
-          required
-          helperText="Name"
-        />
-        <TextField
-          onChange={(e) => {
-            service.updateExercise({
-              ...exercise,
-              description: e.target.value,
-            });
-          }}
-          fullWidth
-          variant="filled"
+        <Field name="name" value={exercise.name} onPatch={onPatch} />
+        <Field
+          name="description"
           value={exercise.description}
-          required
-          helperText="Description"
+          onPatch={onPatch}
+        />
+        <Field
+          name="oneRepMax"
+          value={exercise.oneRepMax || ""}
+          onPatch={onPatch}
         />
       </div>
+      <BackButton />
     </Box>
+  );
+}
+
+function Field({
+  name,
+  value,
+  onPatch,
+}: {
+  value: string;
+  name: string;
+  onPatch: (name: string, value: string) => void;
+}) {
+  return (
+    <TextField
+      onChange={(e) => {
+        onPatch(name, e.target.value);
+      }}
+      fullWidth
+      value={value}
+      required
+      helperText={name}
+    />
   );
 }
