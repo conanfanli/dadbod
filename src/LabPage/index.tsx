@@ -8,6 +8,7 @@ export function LabPage() {
   console.log("lab");
   const service = React.useMemo(() => getEventService(), []);
 
+  //<ExercisePageBottomNavigation />
   return (
     <div>
       <AddExerciseForm
@@ -16,7 +17,6 @@ export function LabPage() {
         }}
       />
       <ExerciseList />
-      <ExercisePageBottomNavigation />
     </div>
   );
 }

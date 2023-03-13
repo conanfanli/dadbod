@@ -3,12 +3,14 @@ import { Box, TextField } from "@mui/material";
 import { IExercise, WithId } from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
+import { useParams } from "react-router-dom";
 
-export function ExerciseEditForm({ exerciseId }: { exerciseId: string }) {
+export function ExerciseEditForm({ exerciseId }: { exerciseId?: string }) {
+  const { id } = useParams();
   const service = React.useMemo(() => getEventService(), []);
 
   const exercise = useLiveQuery<WithId<IExercise>>(
-    () => service.getExercise(exerciseId),
+    () => service.getExercise(id || ""),
     [service]
   );
 
