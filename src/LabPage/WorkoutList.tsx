@@ -15,7 +15,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { WithId, IWorkout } from "../types";
 
 export function WorkoutList() {
-  const [expand, setExpand] = React.useState("");
+  const [_, setExpand] = React.useState("");
   const navigate = useNavigate();
 
   const service = React.useMemo(() => getEventService(), []);
