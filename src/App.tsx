@@ -4,6 +4,7 @@ import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 import { LabPage } from "./LabPage";
 import { ExerciseEditForm } from "./LabPage/ExerciseEditForm";
 import { Footer } from "./Footer";
+import { WorkoutEditForm } from "./LabPage/WorkoutEditForm";
 
 function Root() {
   return (
@@ -23,6 +24,7 @@ const router = createBrowserRouter(
       children: [
         { path: "/", element: <LabPage /> },
         { path: "exercises/:exerciseId", element: <ExerciseEditForm /> },
+        { path: "workouts/:workoutId", element: <WorkoutEditForm /> },
       ],
     },
     {

@@ -6,6 +6,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { getEventService, IEventService } from "./indexeddb/service";
+import { BackButton } from "./BackButton";
 
 export function Footer() {
   console.log("render bottom navigation");
@@ -29,6 +30,7 @@ export function Footer() {
       sx={{ position: "fixed", bottom: 1, left: 0, right: 0 }}
       elevation={3}
     >
+      <BackButton />
       <Button
         onClick={() => navigate("/spreadsheet/authorize")}
         endIcon={
