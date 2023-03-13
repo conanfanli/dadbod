@@ -58,7 +58,7 @@ function SyncButton({ eventService }: { eventService: IEventService }) {
       endIcon={<CloudSync color="primary" />}
       onClick={async () => {
         await eventService.syncState();
-        window.location.reload();
+        // window.location.reload();
       }}
     >
       {getStateDiffLabel(stateDiff)}
