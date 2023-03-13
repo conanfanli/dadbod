@@ -5,12 +5,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
 import { useParams } from "react-router-dom";
 
-export function ExerciseEditForm({ exerciseId }: { exerciseId?: string }) {
-  const { id } = useParams();
+export function ExerciseEditForm() {
+  const { exerciseId } = useParams();
   const service = React.useMemo(() => getEventService(), []);
 
   const exercise = useLiveQuery<WithId<IExercise>>(
-    () => service.getExercise(id || ""),
+    () => service.getExercise(exerciseId || ""),
     [service]
   );
 

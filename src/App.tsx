@@ -22,7 +22,7 @@ const router = createBrowserRouter(
       element: <Root />,
       children: [
         { path: "/", element: <LabPage /> },
-        { path: "exercises/:id", element: <ExerciseEditForm /> },
+        { path: "exercises/:exerciseId", element: <ExerciseEditForm /> },
       ],
     },
     {
