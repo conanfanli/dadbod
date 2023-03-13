@@ -11,25 +11,18 @@ import IconButton from "@mui/material/IconButton";
 import CommentIcon from "@mui/icons-material/Comment";
 import { IExercise, WithId } from "../types";
 
-export function ExercisePickList() {
+export function ExercisePickList({
+  picked,
+  onPick,
+}: {
+  picked: string[];
+  onPick: (exerciseId: string) => void;
+}) {
   console.log("render pick list");
-  const [checked, setChecked] = React.useState<string[]>([]);
   const service = React.useMemo(() => getEventService(), []);
+
   const exercises =
     useLiveQuery(() => service.listExercises(), [service]) || [];
-
-  const onToggle = (id: string) => () => {
-    const currentIndex = checked.indexOf(id);
-    const newChecked = [...checked];
-
-    if (currentIndex === -1) {
-      newChecked.push(id);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
-
-    setChecked(newChecked);
-  };
 
   return (
     <List
@@ -43,8 +36,8 @@ export function ExercisePickList() {
       {exercises.map((ex) => (
         <Exercise
           key={ex.id}
-          onToggle={onToggle(ex.id)}
-          checked={checked}
+          onToggle={() => onPick(ex.id)}
+          picked={picked}
           exercise={ex}
         />
       ))}
@@ -55,10 +48,10 @@ export function ExercisePickList() {
 function Exercise({
   exercise,
   onToggle,
-  checked,
+  picked,
 }: {
-  checked: Array<string>;
-  onToggle: (e) => void;
+  picked: Array<string>;
+  onToggle: () => void;
   exercise: WithId<IExercise>;
 }) {
   return (
@@ -75,7 +68,7 @@ function Exercise({
         <ListItemIcon>
           <Checkbox
             edge="start"
-            checked={checked.indexOf(exercise.id) !== -1}
+            checked={picked.indexOf(exercise.id) !== -1}
             tabIndex={-1}
             disableRipple
           />

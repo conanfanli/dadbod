@@ -16,6 +16,10 @@ export function WorkoutEditForm() {
     [service]
   );
 
+  if (!workoutId) {
+    return <div>oops</div>;
+  }
+
   const workout =
     results && results.length > 0
       ? results[0]
@@ -33,6 +37,21 @@ export function WorkoutEditForm() {
       [name]: value,
     });
   }
+  function onPick(exerciseId: string) {
+    const currentIndex = workout.exerciseIds.indexOf(exerciseId);
+    const newChecked = [...workout.exerciseIds];
+
+    if (currentIndex === -1) {
+      newChecked.push(exerciseId);
+    } else {
+      newChecked.splice(currentIndex, 1);
+    }
+
+    service.updateWorkout({
+      ...(workout as WithId<IWorkout>),
+      exerciseIds: newChecked,
+    });
+  }
   return (
     <Box noValidate component="form">
       <div>
@@ -43,7 +62,7 @@ export function WorkoutEditForm() {
           value={workout.description}
           onPatch={onPatch}
         />
-        <ExercisePickList />
+        <ExercisePickList picked={workout.exerciseIds} onPick={onPick} />
       </div>
     </Box>
   );
