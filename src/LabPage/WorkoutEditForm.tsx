@@ -1,10 +1,9 @@
 import * as React from "react";
-import { Box, TextField } from "@mui/material";
+import { Box, debounce, TextField } from "@mui/material";
 import { IWorkout, WithId } from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
 import { useParams } from "react-router-dom";
-import { BackButton } from "../BackButton";
 import { getIsoDate } from "../util";
 
 export function WorkoutEditForm() {
@@ -28,7 +27,6 @@ export function WorkoutEditForm() {
         };
 
   function onPatch(name: string, value: string) {
-    console.log("xxxx");
     service.updateWorkout({
       ...(workout as WithId<IWorkout>),
       [name]: value,
