@@ -1,10 +1,11 @@
 import * as React from "react";
-import { Box, debounce, TextField } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 import { IWorkout, WithId } from "../types";
 import { useLiveQuery } from "dexie-react-hooks";
 import { getEventService } from "../indexeddb/service";
 import { useParams } from "react-router-dom";
 import { getIsoDate } from "../util";
+import { ExerciseList } from "./ExerciseList";
 
 export function WorkoutEditForm() {
   const { workoutId } = useParams();
@@ -42,6 +43,7 @@ export function WorkoutEditForm() {
           value={workout.description}
           onPatch={onPatch}
         />
+        <ExerciseList />
       </div>
     </Box>
   );
