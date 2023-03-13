@@ -1,10 +1,9 @@
 import * as React from "react";
 import { Button, Box, TextField } from "@mui/material";
+import { getEventService } from "../indexeddb/service";
 
-export function AddExerciseForm(props: {
-  onSubmit: (data: { name: string; description: string }) => void;
-}) {
-  const { onSubmit } = props;
+export function AddExerciseForm() {
+  const service = React.useMemo(() => getEventService(), []);
   const [name, setName] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [hidden, setHidden] = React.useState(true);
@@ -16,7 +15,7 @@ export function AddExerciseForm(props: {
     }
 
     // Form is displaying
-    onSubmit({ name, description });
+    service.createExercise({ name, description });
     setHidden(true);
     setName("");
     setDescription("");

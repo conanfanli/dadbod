@@ -13,6 +13,12 @@ export interface IExerciseLog {
   exerciseId: string;
   sets: Array<ISet>;
 }
+export interface IWorkout {
+  date: string;
+  name: string;
+  description: string;
+  exerciseIds: Array<string>;
+}
 
 export interface ISet {
   setNumber: number;
@@ -28,7 +34,9 @@ const ACTIONS = [
   "create-exercise-log",
   "update-exercise-log",
 
-  "upload-state",
+  "create-workout",
+  "update-workout",
+  "delete-workout",
 ] as const;
 
 export type ActionType = (typeof ACTIONS)[number];
@@ -44,4 +52,5 @@ export interface DbState {
   events: Array<WithId<IEvent>>;
   exerciseLogs: Array<WithId<IExerciseLog>>;
   exercises: Array<WithId<IExercise>>;
+  workouts: Array<WithId<IWorkout>>;
 }

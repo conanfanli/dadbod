@@ -3,17 +3,19 @@ import type {
   IEvent,
   IExercise,
   IExerciseLog,
+  IWorkout,
   WithId,
 } from "../types";
 import Dexie, { Table as DexieTable } from "dexie";
 
 export class DbClient extends Dexie {
   static readonly DB_NAME = "dadbod";
-  static readonly LATEST_VERSION = 14;
+  static readonly LATEST_VERSION = 15;
 
   exercises!: DexieTable<WithId<IExercise>>;
   exerciseLogs!: DexieTable<WithId<IExerciseLog>>;
   events!: DexieTable<WithId<IEvent>>;
+  workouts!: DexieTable<WithId<IWorkout>>;
 
   public constructor() {
     super(DbClient.DB_NAME);
@@ -21,6 +23,7 @@ export class DbClient extends Dexie {
       exercises: "id, &name",
       exerciseLogs: "id, &[date+exerciseId], exerciseId",
       events: "id, action, entityId, createdAt",
+      workouts: "id, &date, &name",
     });
     console.log("inited db client");
   }
@@ -29,11 +32,13 @@ export class DbClient extends Dexie {
     const exercises = await this.exercises.toArray();
     const exerciseLogs = await this.exerciseLogs.toArray();
     const events = await this.events.toArray();
+    const workouts = await this.workouts.toArray();
     // Fix date
     return {
       exercises,
       exerciseLogs,
       events,
+      workouts,
       revision: await this.getRevision(),
     };
   }
@@ -49,6 +54,7 @@ export class DbClient extends Dexie {
       this.exercises,
       this.exerciseLogs,
       this.events,
+      this.workouts,
       async () => {
         await this.exercises.bulkDelete(
           await this.exercises.toCollection().keys()
@@ -62,6 +68,11 @@ export class DbClient extends Dexie {
 
         await this.events.bulkDelete(await this.events.toCollection().keys());
         await this.events.bulkAdd(remoteState.events);
+
+        await this.workouts.bulkDelete(
+          await this.workouts.toCollection().keys()
+        );
+        await this.workouts.bulkAdd(remoteState.workouts);
 
         console.log("finished loading remote state");
       }
