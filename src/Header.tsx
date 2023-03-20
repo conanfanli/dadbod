@@ -1,18 +1,18 @@
-import CloudOff from "@mui/icons-material/CloudOff";
+import MenuIcon from "@mui/icons-material/Menu";
 import CloudSync from "@mui/icons-material/CloudSync";
-import PublishedWithChanges from "@mui/icons-material/PublishedWithChanges";
-import { Button, Paper } from "@mui/material";
+import CloudOff from "@mui/icons-material/CloudOff";
+import { Button, Box, AppBar, Toolbar, IconButton } from "@mui/material";
 import { useLiveQuery } from "dexie-react-hooks";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { getEventService, IEventService } from "./indexeddb/service";
+import { BackButton } from "./BackButton";
+import { NavDrawer } from "./NavDrawer";
 
-export function Footer() {
-  console.log("render bottom navigation");
+export function Header() {
   const [connected, setConnected] = React.useState("");
 
   const eventService = React.useMemo(() => getEventService(), []);
-  const navigate = useNavigate();
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -24,28 +24,51 @@ export function Footer() {
     fetchData();
   }, [eventService]);
 
+  const [open, setOpen] = React.useState(false);
+  function toggleDrawer() {
+    setOpen(!open);
+  }
   return (
-    <Paper
-      sx={{ position: "fixed", bottom: 1, left: 0, right: 0 }}
-      elevation={3}
-    >
-      <Button
-        onClick={() => navigate("/spreadsheet/authorize")}
-        endIcon={
-          connected ? (
-            <PublishedWithChanges color="success" />
-          ) : (
-            <CloudOff color="error" />
-          )
-        }
-      >
-        {`${connected ? `${connected}` : "offline"}`}
-      </Button>
-      {connected ? <SyncButton eventService={eventService} /> : null}
-    </Paper>
+    <>
+      <Box sx={{ display: "flex" }}>
+        <AppBar color="default" position="static">
+          <Toolbar>
+            <IconButton
+              size="large"
+              sx={{ mr: 2 }}
+              color="inherit"
+              edge="start"
+              onClick={toggleDrawer}
+            >
+              <MenuIcon></MenuIcon>
+            </IconButton>
+            {connected ? (
+              <div style={{ flexGrow: 1 }}>
+                <SyncButton eventService={eventService} />
+              </div>
+            ) : (
+              <OfflineButton />
+            )}
+            <BackButton />
+          </Toolbar>
+        </AppBar>
+        <NavDrawer open={open} toggleDrawer={toggleDrawer} />
+      </Box>
+    </>
   );
 }
 
+function OfflineButton() {
+  const navigate = useNavigate();
+  return (
+    <Button
+      onClick={() => navigate("/spreadsheet/authorize")}
+      endIcon={<CloudOff color="error" />}
+    >
+      offline
+    </Button>
+  );
+}
 function SyncButton({ eventService }: { eventService: IEventService }) {
   console.log("render sheet connection");
   const stateDiff =
@@ -56,7 +79,6 @@ function SyncButton({ eventService }: { eventService: IEventService }) {
       endIcon={<CloudSync color="primary" />}
       onClick={async () => {
         await eventService.syncState();
-        window.location.reload();
       }}
     >
       {getStateDiffLabel(stateDiff)}

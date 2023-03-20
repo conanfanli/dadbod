@@ -1,12 +1,18 @@
 import * as React from "react";
-import { Button } from "@mui/material";
+import { IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import ArrowBack from "@mui/icons-material/ArrowBack";
 
 export function BackButton() {
   const navigate = useNavigate();
   return (
-    <Button variant="contained" onClick={() => navigate(-1)}>
-      Back
-    </Button>
+    <IconButton
+      color="inherit"
+      onClick={() => {
+        navigate(-1);
+      }}
+    >
+      <ArrowBack />
+    </IconButton>
   );
 }

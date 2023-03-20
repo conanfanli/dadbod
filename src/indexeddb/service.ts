@@ -1,26 +1,34 @@
-import { DbState, WithId, IExercise, IExerciseLog } from "../types";
+import { DbState, WithId, IExercise, IExerciseLog, IWorkout } from "../types";
 import { v4 as uuidv4 } from "uuid";
 import { DbClient } from "./client";
 import { getSheetService, ISheetService } from "../googlespreadsheet/service";
 
 export interface IEventService {
-  createExercise(data: IExercise): Promise<WithId<IExercise>>;
-  updateExercise(data: WithId<IExercise>): Promise<WithId<IExercise>>;
-  getExercise(id: string): Promise<WithId<IExercise>>;
-  deleteExercise(name: string): Promise<void>;
   getConnectedSheetName(): Promise<string>;
-  getExerciseSets(filter: {
-    date: string;
-    exerciseId: string;
-  }): Promise<Array<IExerciseLog>>;
-  getLocalState(): Promise<DbState>;
+
+  //States
   /**
    * Return the time difference between local state and remote state
    */
   getStateDiff(): Promise<number>;
+  getLocalState(): Promise<DbState>;
+  syncState(): Promise<void>;
+
+  // Exercises
+  createExercise(data: IExercise): Promise<WithId<IExercise>>;
+  deleteExercise(name: string): Promise<void>;
+  getExercise(id: string): Promise<WithId<IExercise>>;
+  updateExercise(data: WithId<IExercise>): Promise<WithId<IExercise>>;
+  getExerciseSets(filter: {
+    date: string;
+    exerciseId: string;
+  }): Promise<Array<IExerciseLog>>;
   listExercises(): Promise<Array<WithId<IExercise>>>;
   logExercise(data: IExerciseLog): Promise<WithId<IExerciseLog>>;
-  syncState(): Promise<void>;
+
+  //Workouts
+  getWorkouts(id?: string): Promise<WithId<IWorkout>[]>;
+  updateWorkout(data: WithId<IWorkout>): Promise<WithId<IWorkout>>;
 }
 
 class EventService implements IEventService {
@@ -32,6 +40,16 @@ class EventService implements IEventService {
     this.remote = getSheetService();
   }
 
+  public async getWorkouts(id?: string): Promise<WithId<IWorkout>[]> {
+    if (!id) {
+      return this.local.workouts.toArray();
+    }
+    const workout = await this.local.workouts.get(id);
+    if (!workout) {
+      return [];
+    }
+    return [workout];
+  }
   public async getExercise(id: string): Promise<WithId<IExercise>> {
     const ret = await this.local.exercises.get(id);
     if (!ret) {
@@ -48,7 +66,6 @@ class EventService implements IEventService {
       ? remoteState.revision
       : new Date("1907-01-01");
 
-    console.log("local ", localRevision, "remote ", remoteRevision);
     const timeDiff = localRevision.getTime() - remoteRevision.getTime();
 
     return timeDiff;
@@ -56,11 +73,9 @@ class EventService implements IEventService {
   public async syncState(): Promise<void> {
     const timeDiff = await this.getStateDiff();
     if (timeDiff > 0) {
-      console.log("localState is ahead", timeDiff / 1000);
       const localState = await this.local.serialize();
       await this.remote.saveState(JSON.stringify(localState));
     } else if (timeDiff < 0) {
-      console.log("remote is ahead", timeDiff / 1000);
       const remoteState = await this.remote.getLatestState();
       if (!remoteState) {
         throw new Error("no remote state available");
@@ -145,6 +160,27 @@ class EventService implements IEventService {
       }
     );
   }
+  public async updateWorkout(
+    data: WithId<IWorkout>
+  ): Promise<WithId<IWorkout>> {
+    console.log("update-workout", data);
+    return this.local.transaction(
+      "rw",
+      this.local.workouts,
+      this.local.events,
+      async () => {
+        await this.local.workouts.put(data);
+        await this.local.events.add({
+          id: uuidv4(),
+          action: "update-workout",
+          createdAt: new Date(),
+          entityId: data.id,
+          payload: data,
+        });
+        return data;
+      }
+    );
+  }
   public async updateExercise(data: WithId<IExercise>) {
     return this.local.transaction(
       "rw",
@@ -159,6 +195,7 @@ class EventService implements IEventService {
           entityId: data.id,
           payload: data,
         });
+        console.log("update-exercise", data);
         return data;
       }
     );
