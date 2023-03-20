@@ -12,6 +12,7 @@ export interface IEventService {
    */
   getStateDiff(): Promise<number>;
   getLocalState(): Promise<DbState>;
+  getRevision(source: "local" | "remote"): Promise<Date>;
   syncState(): Promise<void>;
 
   // Exercises
@@ -58,18 +59,24 @@ class EventService implements IEventService {
 
     return ret;
   }
-  public async getStateDiff(): Promise<number> {
-    const localRevision =
-      (await this.local.getRevision()) || new Date("1907-01-01");
+  public async getRevision(source: "local" | "remote"): Promise<Date> {
+    if (source === "local") {
+      return (await this.local.getRevision()) || new Date("1907-01-01");
+    }
     const remoteState = await this.remote.getLatestState();
     const remoteRevision = remoteState
       ? remoteState.revision
       : new Date("1907-01-01");
+    return remoteRevision;
+  }
 
+  public async getStateDiff(): Promise<number> {
+    const localRevision = await this.getRevision("local");
+    const remoteRevision = await this.getRevision("remote");
     const timeDiff = localRevision.getTime() - remoteRevision.getTime();
-
     return timeDiff;
   }
+
   public async syncState(): Promise<void> {
     const timeDiff = await this.getStateDiff();
     if (timeDiff > 0) {

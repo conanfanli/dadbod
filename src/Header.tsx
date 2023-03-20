@@ -1,7 +1,6 @@
-import MenuIcon from "@mui/icons-material/Menu";
 import CloudSync from "@mui/icons-material/CloudSync";
 import CloudOff from "@mui/icons-material/CloudOff";
-import { Button, Box, AppBar, Toolbar, IconButton } from "@mui/material";
+import { Button, Box, AppBar, Toolbar } from "@mui/material";
 import { useLiveQuery } from "dexie-react-hooks";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,24 +23,12 @@ export function Header() {
     fetchData();
   }, [eventService]);
 
-  const [open, setOpen] = React.useState(false);
-  function toggleDrawer() {
-    setOpen(!open);
-  }
   return (
     <>
       <Box sx={{ display: "flex" }}>
         <AppBar color="default" position="static">
           <Toolbar>
-            <IconButton
-              size="large"
-              sx={{ mr: 2 }}
-              color="inherit"
-              edge="start"
-              onClick={toggleDrawer}
-            >
-              <MenuIcon></MenuIcon>
-            </IconButton>
+            <NavDrawer />
             {connected ? (
               <div style={{ flexGrow: 1 }}>
                 <SyncButton eventService={eventService} />
@@ -52,7 +39,6 @@ export function Header() {
             <BackButton />
           </Toolbar>
         </AppBar>
-        <NavDrawer open={open} toggleDrawer={toggleDrawer} />
       </Box>
     </>
   );

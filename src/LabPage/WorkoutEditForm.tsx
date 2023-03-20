@@ -56,7 +56,6 @@ function EditForm({
 
 function Form({ workout, service }) {
   function onPatch(name: string, value: string) {
-    console.log(name, value, workout);
     service.updateWorkout({
       ...workout,
       [name]: value,
@@ -80,19 +79,10 @@ function Form({ workout, service }) {
   }
   return (
     <Box noValidate component="form">
-      <div>
-        <Field name="date" value={workout.date} onPatch={onPatch} />
-        <Field name="name" value={workout.name} onPatch={onPatch} />
-        <Field
-          name="description"
-          value={workout.description}
-          onPatch={onPatch}
-        />
-        <ExercisePickList
-          picked={workout.exerciseIds}
-          onPick={onPickExercise}
-        />
-      </div>
+      <Field name="date" value={workout.date} onPatch={onPatch} />
+      <Field name="name" value={workout.name} onPatch={onPatch} />
+      <Field name="description" value={workout.description} onPatch={onPatch} />
+      <ExercisePickList picked={workout.exerciseIds} onPick={onPickExercise} />
     </Box>
   );
 }

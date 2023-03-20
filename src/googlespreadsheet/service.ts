@@ -38,9 +38,9 @@ class SheetService implements ISheetService {
 
   public async getLatestState(): Promise<DbState | null> {
     await this.client.connect();
-    const rows = await this.getRows();
-    if (rows && rows.length > 0) {
-      return JSON.parse(rows[rows.length - 1][1], reviver);
+    const latest = await this.client.getLatestRow(this.sheetId);
+    if (latest) {
+      return JSON.parse(latest[1], reviver);
     }
 
     return null;
@@ -60,7 +60,7 @@ class SheetService implements ISheetService {
   }
 
   public async promptConcent() {
-    return await this.client.promptConcent();
+    return await this.client.promptConcent(true);
   }
 
   private async _promptConsentOn401<T>(apiPromise: Promise<T>): Promise<T> {

@@ -37,7 +37,7 @@ export class DbClient extends Dexie {
     return {
       exercises,
       exerciseLogs,
-      events: events.slice(events.length - 10),
+      events,
       workouts,
       revision: await this.getRevision(),
     };

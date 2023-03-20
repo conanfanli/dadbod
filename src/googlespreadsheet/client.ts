@@ -8,8 +8,9 @@ export interface ISheetClient {
   ): Promise<gapi.client.sheets.AppendValuesResponse | null>;
   connect(): Promise<void>;
   getSheetName(sheetId: string): Promise<string>;
-  promptConcent(): Promise<void>;
+  promptConcent(prompt?: boolean): Promise<void>;
   getRows(sheeId: string): Promise<[string, string][] | null>;
+  getLatestRow(sheeId: string): Promise<[string, string] | null>;
   getToken(): GoogleApiOAuth2TokenObject | null;
 }
 
@@ -21,21 +22,6 @@ export class SheetClient implements ISheetClient {
   readonly DISCOVERY_DOC =
     "https://sheets.googleapis.com/$discovery/rest?version=v4";
   private tokenClient?: google.accounts.oauth2.TokenClient;
-
-  public async addRow(sheetId: string, row: Array<string>) {
-    const response = await gapi.client.sheets.spreadsheets.values.append(
-      {
-        spreadsheetId: sheetId,
-        range: "Sheet1!A2:B2",
-        valueInputOption: "USER_ENTERED",
-      },
-      {
-        majorDimension: "ROWS",
-        values: [row],
-      }
-    );
-    return response.result;
-  }
 
   private _setToken(token: GoogleApiOAuth2TokenObject) {
     localStorage.setItem("spreadsheet_token", JSON.stringify(token));
@@ -119,7 +105,7 @@ export class SheetClient implements ISheetClient {
     });
   }
 
-  public async promptConcent() {
+  public async promptConcent(prompt: boolean = false) {
     return new Promise<void>((resolve, reject) => {
       if (!this.tokenClient) {
         throw new Error("failed to init token client");
@@ -130,14 +116,14 @@ export class SheetClient implements ISheetClient {
         resolve();
       };
 
-      if (!this.getToken()) {
+      if (!this.getToken() || prompt) {
         // Prompt the user to select a Google Account and ask for consent to share their data
         // when establishing a new session.
         this.tokenClient.requestAccessToken({ prompt: "consent" });
       } else {
         // Skip display of account chooser and consent dialog for an existing session.
         console.log("live spreadsheet session");
-        this.tokenClient.requestAccessToken({ prompt: "consent" });
+        this.tokenClient.requestAccessToken({ prompt: "none" });
       }
     });
   }
@@ -150,10 +136,21 @@ export class SheetClient implements ISheetClient {
     return res.result?.properties?.title || "";
   }
 
+  public async getLatestRow(sheetId: string) {
+    const response = await gapi.client.sheets.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: "Sheet1!C2:D2",
+    });
+    const range = response.result;
+    if (!range || !range.values || range.values.length === 0) {
+      return null;
+    }
+    return range.values[0] as [string, string];
+  }
   public async getRows(sheetId: string) {
     const response = await gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId: sheetId,
-      range: "A2:B9999",
+      range: "Sheet1!A2:B",
     });
     const range = response.result;
     if (!range || !range.values || range.values.length === 0) {
@@ -162,9 +159,18 @@ export class SheetClient implements ISheetClient {
     return range.values as [string, string][];
   }
 
-  public async saveState(sheetId: string, jsonState: string) {
-    this.getToken();
-
+  public async addRow(sheetId: string, row: Array<string>) {
+    await gapi.client.sheets.spreadsheets.values.update(
+      {
+        spreadsheetId: sheetId,
+        range: "Sheet1!C1:C2",
+        valueInputOption: "USER_ENTERED",
+      },
+      {
+        majorDimension: "ROWS",
+        values: [["latest"], ["=index(sort(A2:B,1,false),1,0)"]],
+      }
+    );
     const response = await gapi.client.sheets.spreadsheets.values.append(
       {
         spreadsheetId: sheetId,
@@ -173,10 +179,9 @@ export class SheetClient implements ISheetClient {
       },
       {
         majorDimension: "ROWS",
-        values: [[new Date().toISOString(), jsonState]],
+        values: [row],
       }
     );
-    console.log("got resonse", response.result);
     return response.result;
   }
 }

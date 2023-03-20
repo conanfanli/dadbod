@@ -23,6 +23,16 @@ export function ExercisePickList({
 
   const exercises =
     useLiveQuery(() => service.listExercises(), [service]) || [];
+  const sorted = [...exercises];
+
+  sorted.sort((a, b) => {
+    if (picked.indexOf(a.id) >= 0 && picked.indexOf(b.id) < 0) {
+      return -1;
+    } else if (picked.indexOf(b.id) >= 0 && picked.indexOf(a.id) < 0) {
+      return 1;
+    }
+    return +(a.name > b.name);
+  });
 
   return (
     <List
@@ -33,7 +43,7 @@ export function ExercisePickList({
         mb: "3ch",
       }}
     >
-      {exercises.map((ex) => (
+      {sorted.map((ex) => (
         <Exercise
           key={ex.id}
           onToggle={() => onPick(ex.id)}
@@ -64,13 +74,14 @@ function Exercise({
       }
       disablePadding
     >
-      <ListItemButton role={undefined} onClick={onToggle} dense>
+      <ListItemButton role={undefined} dense>
         <ListItemIcon>
           <Checkbox
             edge="start"
             checked={picked.indexOf(exercise.id) !== -1}
             tabIndex={-1}
             disableRipple
+            onChange={onToggle}
           />
         </ListItemIcon>
         <ListItemText id={exercise.id} primary={exercise.name} />
