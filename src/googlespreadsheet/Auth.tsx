@@ -3,21 +3,23 @@ import { TextField, Button } from "@mui/material";
 import { StateTable } from "./StateTable";
 import { getSheetService } from "./service";
 import { getEventService } from "../indexeddb/service";
+import { SheetContext } from "../contexts";
 
 export function Authorize() {
   console.log("Render authorize");
 
   const sheetService = React.useMemo(() => getSheetService(), []);
+  const sheet = React.useContext(SheetContext);
 
-  const [hasConsent, setHasConsent] = React.useState(false);
   const [sheetId, setSheetId] = React.useState(sheetService.sheetId);
   const [sheetName, setSheetName] = React.useState("");
   const [rows, setRows] = React.useState<[string, string][]>([]);
 
   React.useEffect(() => {
     async function authenticate() {
-      setHasConsent(await sheetService.hasConsent());
-      setSheetName(await sheetService.getSheetName());
+      if (await sheetService.hasConsent()) {
+        setSheetName(await sheetService.getSheetName());
+      }
     }
 
     authenticate();
@@ -41,7 +43,7 @@ export function Authorize() {
         variant="contained"
         onClick={async () => {
           await sheetService.promptConcent();
-          setHasConsent(await sheetService.hasConsent());
+          await sheet.refresh()
         }}
         fullWidth
       >
@@ -56,7 +58,7 @@ export function Authorize() {
             JSON.stringify(await service.getLocalState())
           );
         }}
-        disabled={!hasConsent || !sheetId}
+        disabled={!sheet.remoteRevision || !sheetId}
       >
         Save State
       </Button>
@@ -68,7 +70,7 @@ export function Authorize() {
           const rows = (await sheetService.getRows()) || [];
           setRows(rows);
         }}
-        disabled={!hasConsent || !sheetId}
+        disabled={!sheet.remoteRevision || !sheetId}
       >
         List Rows
       </Button>

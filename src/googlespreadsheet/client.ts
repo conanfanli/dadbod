@@ -102,8 +102,11 @@ export class SheetClient implements ISheetClient {
             }
           },
         });
+        // getToken to sync tokens between localStorage and gapi.client
+        this.getToken()
         resolve();
       } catch (err) {
+        console.error("reject at 107");
         reject(err);
       }
     });
@@ -141,15 +144,20 @@ export class SheetClient implements ISheetClient {
   }
 
   public async getLatestRow(sheetId: string) {
-    const response = await gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: "Sheet1!C2:D2",
-    });
-    const range = response.result;
-    if (!range || !range.values || range.values.length === 0) {
+    try {
+      const response = await gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId: sheetId,
+        range: "Sheet1!C2:D2",
+      });
+      const range = response.result;
+      if (!range || !range.values || range.values.length === 0) {
+        return null;
+      }
+      return range.values[0] as [string, string];
+    } catch (e) {
+      console.error("cannot get latest row", { token: gapi.client.getToken(), status: (e as any).status });
       return null;
     }
-    return range.values[0] as [string, string];
   }
   public async getRows(sheetId: string) {
     const response = await gapi.client.sheets.spreadsheets.values.get({

@@ -6,14 +6,17 @@ import { Header } from "./Header";
 import { WorkoutPage } from "./LabPage/WorkoutEditForm";
 import { ExerciseList } from "./LabPage/ExerciseList";
 import { WorkoutList } from "./LabPage/WorkoutList";
+import { SheetProvider } from "./contexts";
 
 function Root() {
   return (
     <>
-      <Header />
-      <div style={{ marginTop: "3ch" }} id="detail">
-        <Outlet />
-      </div>
+      <SheetProvider>
+        <Header />
+        <div style={{ marginTop: "3ch" }} id="detail">
+          <Outlet />
+        </div>
+      </SheetProvider>
     </>
   );
 }

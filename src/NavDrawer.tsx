@@ -14,14 +14,20 @@ import {
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { getEventService } from "./indexeddb/service";
+import { SheetContext } from "./contexts";
 
 export function NavDrawer() {
   const navigate = useNavigate();
+  const sheetContext = React.useContext(SheetContext)
 
   const eventService = React.useMemo(() => getEventService(), []);
   const [open, setOpen] = React.useState(false);
-  const [localRevision, setLocalRevision] = React.useState(new Date("1907"));
-  const [remoteRevision, setRemoteRevision] = React.useState(new Date("1907"));
+  const [localRevision, setLocalRevision] = React.useState<Date | null>(
+    new Date("1907")
+  );
+  const [remoteRevision, setRemoteRevision] = React.useState<Date | null>(
+    new Date("1907")
+  );
   const [expiry, setExpiry] = React.useState<number | null>(null);
 
   async function toggleDrawer() {
@@ -84,10 +90,12 @@ export function NavDrawer() {
             subheader={<ListSubheader>Revisions:</ListSubheader>}
           >
             <ListItem key="local revision">
-              <ListItemText>{`local: ${localRevision.toLocaleString()}`}</ListItemText>
+              <ListItemText>{`local: ${localRevision ? localRevision.toLocaleString() : "NA"
+                }`}</ListItemText>
             </ListItem>
             <ListItem key="remote revision">
-              <ListItemText>{`remote: ${remoteRevision.toLocaleString()}`}</ListItemText>
+              <ListItemText>{`remote: ${remoteRevision ? remoteRevision.toLocaleString() : "NA"
+                }`}</ListItemText>
             </ListItem>
             <ListItem
               key="expiry"
@@ -95,9 +103,10 @@ export function NavDrawer() {
                 <IconButton
                   edge="end"
                   aria-label="comments"
-                  onClick={() => {
+                  onClick={async () => {
                     localStorage.removeItem("spreadsheet_token");
                     setExpiry(null);
+                    await sheetContext.setRemoteRevision(null)
                   }}
                 >
                   <Delete />

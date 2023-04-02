@@ -10,9 +10,9 @@ export interface IEventService {
   /**
    * Return the time difference between local state and remote state
    */
-  getStateDiff(): Promise<number>;
+  getStateDiff(): Promise<number | null>;
   getLocalState(): Promise<DbState>;
-  getRevision(source: "local" | "remote"): Promise<Date>;
+  getRevision(source: "local" | "remote"): Promise<Date | null>;
   syncState(): Promise<void>;
 
   // Exercises
@@ -59,26 +59,30 @@ class EventService implements IEventService {
 
     return ret;
   }
-  public async getRevision(source: "local" | "remote"): Promise<Date> {
+  public async getRevision(source: "local" | "remote"): Promise<Date | null> {
     if (source === "local") {
       return (await this.local.getRevision()) || new Date("1907-01-01");
     }
     const remoteState = await this.remote.getLatestState();
-    const remoteRevision = remoteState
-      ? remoteState.revision
-      : new Date("1907-01-01");
+    const remoteRevision = remoteState ? remoteState.revision : null;
     return remoteRevision;
   }
 
-  public async getStateDiff(): Promise<number> {
+  public async getStateDiff(): Promise<number | null> {
     const localRevision = await this.getRevision("local");
     const remoteRevision = await this.getRevision("remote");
-    const timeDiff = localRevision.getTime() - remoteRevision.getTime();
+    const timeDiff =
+      localRevision && remoteRevision
+        ? localRevision.getTime() - remoteRevision.getTime()
+        : null;
     return timeDiff;
   }
 
   public async syncState(): Promise<void> {
     const timeDiff = await this.getStateDiff();
+    if (timeDiff === null) {
+      return;
+    }
     if (timeDiff > 0) {
       const localState = await this.local.serialize();
       await this.remote.saveState(JSON.stringify(localState));

@@ -1,27 +1,18 @@
 import CloudSync from "@mui/icons-material/CloudSync";
 import CloudOff from "@mui/icons-material/CloudOff";
 import { Button, Box, AppBar, Toolbar } from "@mui/material";
-import { useLiveQuery } from "dexie-react-hooks";
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { getEventService, IEventService } from "./indexeddb/service";
 import { BackButton } from "./BackButton";
 import { NavDrawer } from "./NavDrawer";
+import { SheetContext } from "./contexts";
+import { useLiveQuery } from "dexie-react-hooks";
 
 export function Header() {
-  const [connected, setConnected] = React.useState("");
+  const sheet = React.useContext(SheetContext);
 
   const eventService = React.useMemo(() => getEventService(), []);
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const connectedSheetName = await eventService.getConnectedSheetName();
-      console.log("sheet name is", connectedSheetName);
-      setConnected(connectedSheetName);
-    };
-
-    fetchData();
-  }, [eventService]);
 
   return (
     <>
@@ -30,8 +21,11 @@ export function Header() {
           <Toolbar>
             <NavDrawer />
             <div style={{ flexGrow: 1 }}>
-              {connected ? (
-                <SyncButton eventService={eventService} />
+              {sheet.remoteRevision ? (
+                <SyncButton
+                  remoteRevision={sheet.remoteRevision}
+                  eventService={eventService}
+                />
               ) : (
                 <OfflineButton />
               )}
@@ -55,24 +49,37 @@ function OfflineButton() {
     </Button>
   );
 }
-function SyncButton({ eventService }: { eventService: IEventService }) {
+
+function SyncButton({
+  remoteRevision,
+  eventService,
+}: {
+  remoteRevision: Date | null;
+  eventService: IEventService;
+}) {
   console.log("render sheet connection");
-  const stateDiff =
-    useLiveQuery(async () => eventService.getStateDiff(), [eventService]) || 0;
+  const localRevision =
+    useLiveQuery(async () => eventService.getRevision("local")) || null;
+
+  const timeDiff =
+    localRevision && remoteRevision
+      ? (localRevision.getTime() - remoteRevision.getTime()) / 1000
+      : null;
 
   return (
     <Button
       endIcon={<CloudSync color="primary" />}
-      onClick={async () => {
-        await eventService.syncState();
-      }}
+      onClick={async () => await eventService.syncState()}
     >
-      {getStateDiffLabel(stateDiff)}
+      {getStateDiffLabel(timeDiff)}
     </Button>
   );
 }
 
-function getStateDiffLabel(diffInMs: number): string {
+function getStateDiffLabel(diffInMs: number | null): string {
+  if (diffInMs === null) {
+    return "NA";
+  }
   if (!diffInMs) {
     return "in sync";
   }
