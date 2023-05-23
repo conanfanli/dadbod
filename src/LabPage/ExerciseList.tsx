@@ -13,6 +13,7 @@ import { getEventService } from "../indexeddb/service";
 import { useLiveQuery } from "dexie-react-hooks";
 import { WithId, IExercise } from "../types";
 import { AddExerciseForm } from "./AddExerciseForm";
+import { DebouncedTextField } from "../DebouncedTextField";
 
 export function ExerciseList() {
   const [expand, setExpand] = React.useState("");
@@ -30,6 +31,7 @@ export function ExerciseList() {
   return (
     <List sx={{ width: "100%", mb: "3ch" }}>
       <AddExerciseForm />
+      <DebouncedTextField />
       {exercises.map((exercise, index) => [
         <ExerciseListItem
           key={exercise.id}
