@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@emotion/react':
     specifier: ^11.10.6
@@ -84,8 +88,8 @@ devDependencies:
 
 packages:
 
-  /@adobe/css-tools@4.2.0:
-    resolution: {integrity: sha512-E09FiIft46CmH5Qnjb0wsW54/YQd69LsxeKUOWawmws1XWvyFGURnAChH0mlr7YPFR1ofwvUQfcL0J3lMxXqPA==}
+  /@adobe/css-tools@4.3.1:
+    resolution: {integrity: sha512-/62yikz7NLScCGAAST5SHdnjaDJQBDq0M2muyRTpf2VQhw6StBg2ALiu73zSJQ4fMVLA+0uBhBHAle7Wg+2kSg==}
     dev: false
 
   /@ampproject/remapping@2.2.0:
@@ -2088,11 +2092,11 @@ packages:
       '@types/gapi.client.discovery': 1.0.9
     dev: true
 
-  /@maxim_mazurok/gapi.client.sheets-v4@0.0.20230330:
-    resolution: {integrity: sha512-FyyGiLFDLd5R2m/DFsHF9vFFrfBknTBR0GdVSL/h8v+lJdwF9C2+GMpANz0ElQZygitJlCzuVFqoCa19ufqAww==}
+  /@maxim_mazurok/gapi.client.sheets-v4@0.0.20230822:
+    resolution: {integrity: sha512-t+j8v0GhYH2GwunH5IAhGPfRVfx0IZr3cR6vh49OuxG/V7fdRdP6uvM6+y2rq1ezsoFCOlox9AFjOkjLsb9zVg==}
     dependencies:
       '@types/gapi.client': 1.0.5
-      '@types/gapi.client.discovery': 1.0.9
+      '@types/gapi.client.discovery-v1': 0.0.1
     dev: true
 
   /@mui/base@5.0.0-alpha.118(@types/react@18.0.28)(react-dom@18.2.0)(react@18.2.0):
@@ -2556,7 +2560,7 @@ packages:
     resolution: {integrity: sha512-N5ixQ2qKpi5OLYfwQmUb/5mSV9LneAcaUfp32pn4yCnpb8r/Yz0pXFPck21dIicKmi+ta5WRAknkZCfA8refMA==}
     engines: {node: '>=8', npm: '>=6', yarn: '>=1'}
     dependencies:
-      '@adobe/css-tools': 4.2.0
+      '@adobe/css-tools': 4.3.1
       '@babel/runtime': 7.21.0
       '@types/testing-library__jest-dom': 5.14.5
       aria-query: 5.1.3
@@ -2709,6 +2713,12 @@ packages:
       '@types/gapi': 0.0.44
     dev: true
 
+  /@types/gapi.client.discovery-v1@0.0.1:
+    resolution: {integrity: sha512-xHW6FW+ERNxqFYNhC6yo1yZjBMmigqQIkX11VY8S6NFteZAX8eWpzvSrmmwFEUm4OOLTJhz8dxEyUAs4ltIMnw==}
+    dependencies:
+      '@maxim_mazurok/gapi.client.discovery-v1': 0.0.20200806
+    dev: true
+
   /@types/gapi.client.discovery@1.0.9:
     resolution: {integrity: sha512-51fXpt7DM7+zPG5pgwnNr3KaRXmyszznu66VPpV7+FAu0LGtpTohvdfvkRCnCn2Z6EgNTq/baFAtCa/9ylHOug==}
     deprecated: use @types/gapi.client.discovery-v1 instead; see https://github.com/Maxim-Mazurok/google-api-typings-generator/issues/652 for details
@@ -2719,7 +2729,7 @@ packages:
   /@types/gapi.client.sheets@4.0.20201031:
     resolution: {integrity: sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==}
     dependencies:
-      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230330
+      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230822
     dev: true
 
   /@types/gapi.client@1.0.5:
