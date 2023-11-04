@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Authorize } from "./googlespreadsheet/Auth";
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
-import { ExerciseEditForm } from "./LabPage/ExerciseEditForm";
+import { ExerciseEditForm } from "./labpage/ExerciseEditForm";
 import { Header } from "./Header";
-import { WorkoutPage } from "./LabPage/WorkoutEditForm";
-import { ExerciseList } from "./LabPage/ExerciseList";
-import { WorkoutList } from "./LabPage/WorkoutList";
+import { WorkoutPage } from "./labpage/WorkoutEditForm";
+import { ExerciseList } from "./labpage/ExerciseList";
+import { WorkoutList } from "./labpage/WorkoutList";
 import { SheetProvider } from "./contexts";
 
 function Root() {
