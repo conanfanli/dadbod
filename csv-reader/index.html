@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV Reader</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+  <!-- Library View -->
+  <div id="library-view" class="view active">
+    <h1>CSV Reader</h1>
+    <div id="upload-area">
+      <p>Drop a CSV file here or click to upload</p>
+      <input type="file" id="file-input" accept=".csv,.tsv,.txt">
+    </div>
+    <div id="url-input-area">
+      <input type="text" id="url-input" placeholder="or paste a CSV URL...">
+      <button id="url-fetch-btn">Fetch</button>
+    </div>
+    <div id="url-error" class="error hidden"></div>
+    <div id="deck-list"></div>
+  </div>
+
+  <!-- Column Picker View -->
+  <div id="picker-view" class="view">
+    <h2>Pick columns</h2>
+    <p id="picker-filename"></p>
+    <div id="picker-section-image">
+      <h3>Image column</h3>
+      <div id="image-col-buttons" class="col-buttons"></div>
+    </div>
+    <div id="picker-section-text">
+      <h3>Text column</h3>
+      <div id="text-col-buttons" class="col-buttons"></div>
+    </div>
+    <div id="picker-actions">
+      <input type="text" id="deck-name-input" placeholder="Deck name">
+      <button id="save-deck-btn" disabled>Save to library</button>
+      <button id="start-reading-btn" disabled>Start reading</button>
+      <button id="picker-back-btn">Back</button>
+    </div>
+  </div>
+
+  <!-- Reader View -->
+  <div id="reader-view" class="view">
+    <div id="reader-header">
+      <button id="reader-back-btn">Library</button>
+      <span id="reader-title"></span>
+      <span id="reader-progress"></span>
+      <select id="language-switcher"></select>
+    </div>
+    <div id="reader-content">
+      <img id="reader-image" alt="">
+      <p id="reader-text"></p>
+      <button id="speak-btn">Speak</button>
+    </div>
+    <div id="reader-nav">
+      <button id="prev-btn">Prev</button>
+      <button id="next-btn">Next</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
