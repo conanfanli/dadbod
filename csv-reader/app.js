@@ -287,6 +287,25 @@ function detectLang(text) {
   return "";
 }
 
+let voiceCache = {};
+function loadVoices() {
+  voiceCache = {};
+  for (const v of speechSynthesis.getVoices()) {
+    const lang = v.lang.slice(0, 2);
+    const prev = voiceCache[lang];
+    if (!prev) { voiceCache[lang] = v; continue; }
+    const score = (v) => (v.localService ? 0 : 2) + (/enhanced|premium|compact/i.test(v.name) ? 1 : 0);
+    if (score(v) > score(prev)) voiceCache[lang] = v;
+  }
+}
+speechSynthesis.addEventListener("voiceschanged", loadVoices);
+loadVoices();
+
+function bestVoice(lang) {
+  if (!lang) return null;
+  return voiceCache[lang.slice(0, 2)] || null;
+}
+
 speakBtn.addEventListener("click", () => {
   if (speechSynthesis.speaking) {
     speechSynthesis.cancel();
@@ -297,6 +316,8 @@ speakBtn.addEventListener("click", () => {
   const utterance = new SpeechSynthesisUtterance(text);
   const lang = detectLang(text);
   if (lang) utterance.lang = lang;
+  const voice = bestVoice(lang);
+  if (voice) utterance.voice = voice;
   utterance.rate = 0.75;
   utterance.onend = () => speakBtn.textContent = "Speak";
   speakBtn.textContent = "Stop";
