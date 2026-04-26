@@ -1,0 +1,6 @@
+[
+  { "name": "Demo", "file": "test.csv" },
+  { "name": "Departure", "file": "departure.csv" },
+  { "name": "Mango the Cat", "file": "mango.csv" },
+  { "name": "The Hare and the Tortoise", "file": "hare-tortoise.csv" }
+]

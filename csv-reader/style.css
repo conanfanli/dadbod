@@ -326,16 +326,6 @@ select {
   gap: 0.5rem;
 }
 
-.text-row-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-muted);
-  flex-shrink: 0;
-  padding-top: 0.25rem;
-  min-width: 3.5rem;
-}
-
 .text-row-content {
   font-size: 1.2rem;
   line-height: 1.5;
