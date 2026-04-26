@@ -157,7 +157,7 @@ def main():
     parser.add_argument("--list-stories", action="store_true", help="list available stories and exit")
     parser.add_argument("--languages", nargs="+", default=["chinese", "french"], help="target languages")
     parser.add_argument("--pages", type=int, default=20, help="target number of pages")
-    parser.add_argument("--output", type=str, default="story.csv", help="output CSV path")
+    parser.add_argument("--output", type=str, default="csv-reader/decks/story.csv", help="output CSV path")
     args = parser.parse_args()
 
     print(f"fetching book {args.book}...")
@@ -220,16 +220,17 @@ def main():
 
     print(f"\nwrote {len(rows)} pages to {args.output}")
 
-    manifest_path = os.path.join(os.path.dirname(args.output), "decks.json")
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    manifest_path = os.path.join(script_dir, "decks.json")
     if os.path.exists(manifest_path):
         with open(manifest_path, encoding="utf-8") as f:
             manifest = json.load(f)
     else:
         manifest = []
-    csv_filename = os.path.basename(args.output)
-    deck_name = args.story or os.path.splitext(csv_filename)[0].replace("-", " ").title()
-    if not any(e["file"] == csv_filename for e in manifest):
-        manifest.append({"name": deck_name, "file": csv_filename})
+    rel_path = os.path.relpath(os.path.abspath(args.output), script_dir)
+    deck_name = args.story or os.path.splitext(os.path.basename(args.output))[0].replace("-", " ").title()
+    if not any(e["file"] == rel_path for e in manifest):
+        manifest.append({"name": deck_name, "file": rel_path})
         with open(manifest_path, "w", encoding="utf-8") as f:
             json.dump(manifest, f, indent=2, ensure_ascii=False)
         print(f"added '{deck_name}' to {manifest_path}")
