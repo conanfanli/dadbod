@@ -76,3 +76,26 @@ Migrating to new auth using implicit flow: https://developers.google.com/identit
 This app is deployed to github pages which does not support single page apps. Therefore, I have to use
 this [hack](https://github.com/rafgraph/spa-github-pages)
 
+
+# Generate csv
+
+⏺ PEXELS_API_KEY=<your-key> uv run csv-reader/generate.py \
+    --book 11339 \
+    --story "The Hare And The Tortoise" \
+    --languages chinese french \
+    --pages 12 \
+    --output csv-reader/hare-tortoise.csv
+
+  Without Pexels:
+  uv run csv-reader/generate.py \
+    --book 11339 \
+    --story "The Hare And The Tortoise" \
+    --languages chinese french \
+    --pages 12 \
+    --output csv-reader/hare-tortoise.csv
+
+  Some good Gutenberg IDs:
+  - 11339 — Aesop's Fables (use --list-stories to browse)
+  - 2591 — Grimm's Fairy Tales
+  - 1597 — Hans Christian Andersen's Fairy Tales
+

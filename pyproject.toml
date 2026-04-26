@@ -1,0 +1,13 @@
+[project]
+name = "dadbod"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.14"
+dependencies = [
+    "deep-translator>=1.11.4",
+    "requests>=2.33.1",
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple/"
