@@ -10,5 +10,13 @@
   {
     "name": "Grims Fair Tales",
     "file": "decks/grims-fair-tales.csv"
+  },
+  {
+    "name": "The Fox And The Crow",
+    "file": "decks/fox-crow.csv"
+  },
+  {
+    "name": "The Crow And The Pitcher",
+    "file": "decks/the-crow-and-the-pitcher.csv"
   }
 ]

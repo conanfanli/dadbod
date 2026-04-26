@@ -22,6 +22,7 @@ from deep_translator import GoogleTranslator
 
 GUTENDEX_API = "https://gutendex.com/books"
 PEXELS_API = "https://api.pexels.com/v1/search"
+UNSPLASH_API = "https://api.unsplash.com/search/photos"
 
 LANG_CODES = {
     "chinese": "zh-CN",
@@ -119,20 +120,34 @@ def translate_text(text: str, target_lang: str) -> str:
         return text
 
 
-def search_pexels_image(query: str, api_key: str) -> str:
+def search_image(query: str, unsplash_key: str, pexels_key: str) -> str:
     short_query = " ".join(query.split()[:6])
-    try:
-        resp = requests.get(
-            PEXELS_API,
-            params={"query": short_query, "per_page": 1, "size": "medium"},
-            headers={"Authorization": api_key},
-            timeout=5,
-        )
-        data = resp.json()
-        if data.get("photos"):
-            return data["photos"][0]["src"]["medium"]
-    except Exception as e:
-        print(f"  pexels: {e}", file=sys.stderr)
+    if unsplash_key:
+        try:
+            resp = requests.get(
+                UNSPLASH_API,
+                params={"query": short_query, "per_page": 1},
+                headers={"Authorization": f"Client-ID {unsplash_key}"},
+                timeout=5,
+            )
+            data = resp.json()
+            if data.get("results"):
+                return data["results"][0]["urls"]["regular"]
+        except Exception as e:
+            print(f"  unsplash: {e}", file=sys.stderr)
+    if pexels_key:
+        try:
+            resp = requests.get(
+                PEXELS_API,
+                params={"query": short_query, "per_page": 1, "size": "medium"},
+                headers={"Authorization": pexels_key},
+                timeout=5,
+            )
+            data = resp.json()
+            if data.get("photos"):
+                return data["photos"][0]["src"]["medium"]
+        except Exception as e:
+            print(f"  pexels: {e}", file=sys.stderr)
     return ""
 
 
@@ -148,7 +163,7 @@ def main():
     parser.add_argument("--list-stories", action="store_true", help="list available stories and exit")
     parser.add_argument("--languages", nargs="+", default=["chinese", "french"], help="target languages")
     parser.add_argument("--max-sentences", type=int, default=2, help="max sentences per page")
-    parser.add_argument("--output", type=str, default="csv-reader/decks/story.csv", help="output CSV path")
+    parser.add_argument("--output", type=str, help="output CSV path (auto-generated from story title if omitted)")
     args = parser.parse_args()
 
     print(f"fetching book {args.book}...")
@@ -164,26 +179,36 @@ def main():
                 print(f"  - {title}")
         return
 
+    story_name = None
     if args.story:
         key = args.story.strip().title()
         matches = [k for k in stories if key.lower() in k.lower()]
         if not matches:
             sys.exit(f"story '{args.story}' not found. use --list-stories to see available titles")
-        text = stories[matches[0]]
-        print(f"using story: {matches[0]}")
+        story_name = matches[0]
+        text = stories[story_name]
+        print(f"using story: {story_name}")
     elif stories:
-        longest = max(stories, key=lambda k: len(stories[k]))
-        text = stories[longest]
-        print(f"auto-selected longest story: {longest}")
+        print(f"book has {len(stories)} stories — use --story to pick one:\n")
+        for title in stories:
+            print(f"  - {title}")
+        sys.exit(1)
+
+    if not args.output:
+        slug = re.sub(r"[^a-z0-9]+", "-", (story_name or f"book-{args.book}").lower()).strip("-")
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        args.output = os.path.join(script_dir, "decks", f"{slug}.csv")
+    print(f"output: {args.output}")
 
     sentences = split_into_sentences(text)
     print(f"found {len(sentences)} sentences")
     pages = chunk_sentences(sentences, args.max_sentences)
     print(f"chunked into {len(pages)} pages")
 
+    unsplash_key = os.environ.get("UNSPLASH_ACCESS_KEY", "")
     pexels_key = os.environ.get("PEXELS_API_KEY", "")
-    if not pexels_key:
-        print("no PEXELS_API_KEY set — using picsum fallback images", file=sys.stderr)
+    if not unsplash_key and not pexels_key:
+        print("no UNSPLASH_ACCESS_KEY or PEXELS_API_KEY set — using picsum fallback images", file=sys.stderr)
 
     columns = ["image", "english"] + args.languages
     rows = []
@@ -191,10 +216,7 @@ def main():
     for i, page_text in enumerate(pages):
         print(f"page {i + 1}/{len(pages)}: {page_text[:60]}...")
 
-        if pexels_key:
-            img = search_pexels_image(page_text, pexels_key)
-        else:
-            img = ""
+        img = search_image(page_text, unsplash_key, pexels_key)
         if not img:
             img = fallback_image(i)
 
