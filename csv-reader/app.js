@@ -64,12 +64,10 @@ const pickerBackBtn = document.getElementById("picker-back-btn");
 const readerBackBtn = document.getElementById("reader-back-btn");
 const readerTitle = document.getElementById("reader-title");
 const readerProgress = document.getElementById("reader-progress");
-const languageSwitcher = document.getElementById("language-switcher");
 const readerImage = document.getElementById("reader-image");
-const readerText = document.getElementById("reader-text");
+const readerTexts = document.getElementById("reader-texts");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
-const speakBtn = document.getElementById("speak-btn");
 
 let pendingParse = null;
 let selectedImageCol = null;
@@ -77,7 +75,6 @@ let selectedTextCols = [];
 
 let currentDeck = null;
 let currentRow = 0;
-let currentTextCol = null;
 
 function parseCSV(text, filename) {
   const result = Papa.parse(text.trim(), { header: true, skipEmptyLines: true });
@@ -233,34 +230,54 @@ async function renderDeckList() {
 function openReader(deck) {
   currentDeck = deck;
   currentRow = 0;
-  currentTextCol = deck.textCols[0];
-
   readerTitle.textContent = deck.name;
-  languageSwitcher.innerHTML = "";
-  for (const col of deck.textCols) {
-    const opt = document.createElement("option");
-    opt.value = col;
-    opt.textContent = col;
-    languageSwitcher.appendChild(opt);
-  }
-  languageSwitcher.value = currentTextCol;
-
   renderRow();
   showView("reader-view");
 }
 
-languageSwitcher.addEventListener("change", () => {
-  currentTextCol = languageSwitcher.value;
-  renderRow();
-});
+function speakText(text, btn) {
+  speechSynthesis.cancel();
+  document.querySelectorAll(".text-row-speak.playing").forEach((b) => {
+    b.textContent = "▶";
+    b.classList.remove("playing");
+  });
+  if (btn.classList.contains("playing")) return;
+  const utterance = new SpeechSynthesisUtterance(text);
+  const lang = detectLang(text);
+  if (lang) utterance.lang = lang;
+  const voice = bestVoice(lang);
+  if (voice) utterance.voice = voice;
+  utterance.rate = 0.75;
+  btn.textContent = "■";
+  btn.classList.add("playing");
+  utterance.onend = () => { btn.textContent = "▶"; btn.classList.remove("playing"); };
+  speechSynthesis.speak(utterance);
+}
 
 function renderRow() {
   speechSynthesis.cancel();
-  speakBtn.textContent = "Speak";
   if (!currentDeck || !currentDeck.rows.length) return;
   const row = currentDeck.rows[currentRow];
   readerImage.src = row[currentDeck.imageCol] || "";
-  readerText.textContent = row[currentTextCol] || "";
+  readerTexts.innerHTML = "";
+  for (const col of currentDeck.textCols) {
+    const div = document.createElement("div");
+    div.className = "text-row";
+    const label = document.createElement("span");
+    label.className = "text-row-label";
+    label.textContent = col;
+    const p = document.createElement("p");
+    p.className = "text-row-content";
+    p.textContent = row[col] || "";
+    const btn = document.createElement("button");
+    btn.className = "text-row-speak";
+    btn.textContent = "▶";
+    btn.addEventListener("click", () => speakText(row[col] || "", btn));
+    div.appendChild(label);
+    div.appendChild(p);
+    div.appendChild(btn);
+    readerTexts.appendChild(div);
+  }
   readerProgress.textContent = `${currentRow + 1} / ${currentDeck.rows.length}`;
   prevBtn.disabled = currentRow === 0;
   nextBtn.disabled = currentRow === currentDeck.rows.length - 1;
@@ -305,24 +322,6 @@ function bestVoice(lang) {
   if (!lang) return null;
   return voiceCache[lang.slice(0, 2)] || null;
 }
-
-speakBtn.addEventListener("click", () => {
-  if (speechSynthesis.speaking) {
-    speechSynthesis.cancel();
-    speakBtn.textContent = "Speak";
-    return;
-  }
-  const text = readerText.textContent;
-  const utterance = new SpeechSynthesisUtterance(text);
-  const lang = detectLang(text);
-  if (lang) utterance.lang = lang;
-  const voice = bestVoice(lang);
-  if (voice) utterance.voice = voice;
-  utterance.rate = 0.75;
-  utterance.onend = () => speakBtn.textContent = "Speak";
-  speakBtn.textContent = "Stop";
-  speechSynthesis.speak(utterance);
-});
 
 readerBackBtn.addEventListener("click", () => {
   speechSynthesis.cancel();

@@ -312,20 +312,61 @@ select {
   border-radius: var(--radius);
 }
 
-#reader-text {
-  font-size: 1.4rem;
-  line-height: 1.6;
-  text-align: center;
+#reader-texts {
+  width: 100%;
   max-width: 560px;
-  word-break: break-word;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-#speak-btn {
-  padding: 0.6rem 2rem;
-  font-size: 1rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
+.text-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.text-row-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  padding-top: 0.25rem;
+  min-width: 3.5rem;
+}
+
+.text-row-content {
+  font-size: 1.2rem;
+  line-height: 1.5;
+  word-break: break-word;
+  flex: 1;
+}
+
+.text-row-speak {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 0.9rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-row-speak:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+  background: var(--bg-hover);
+}
+
+.text-row-speak.playing {
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 #reader-nav {
@@ -350,8 +391,8 @@ select {
     font-size: 1.3rem;
   }
 
-  #reader-text {
-    font-size: 1.2rem;
+  .text-row-content {
+    font-size: 1rem;
   }
 
   #reader-view.active {
