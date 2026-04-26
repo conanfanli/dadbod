@@ -1,4 +1,14 @@
 [
-  { "name": "Demo", "file": "decks/demo.csv" },
-  { "name": "The Hare and the Tortoise", "file": "decks/hare-tortoise.csv" }
+  {
+    "name": "Demo",
+    "file": "decks/demo.csv"
+  },
+  {
+    "name": "The Hare and the Tortoise",
+    "file": "decks/hare-tortoise.csv"
+  },
+  {
+    "name": "Grims Fair Tales",
+    "file": "decks/grims-fair-tales.csv"
+  }
 ]

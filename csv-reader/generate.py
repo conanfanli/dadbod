@@ -103,19 +103,10 @@ def split_into_sentences(text: str) -> list[str]:
     return sentences
 
 
-def chunk_sentences(sentences: list[str], target_pages: int) -> list[str]:
-    if len(sentences) <= target_pages:
-        return sentences
-    chunk_size = max(1, len(sentences) // target_pages)
+def chunk_sentences(sentences: list[str], max_per_page: int) -> list[str]:
     pages = []
-    for i in range(0, len(sentences), chunk_size):
-        group = sentences[i : i + chunk_size]
-        pages.append(" ".join(group))
-        if len(pages) >= target_pages:
-            leftover = sentences[i + chunk_size :]
-            if leftover:
-                pages[-1] += " " + " ".join(leftover)
-            break
+    for i in range(0, len(sentences), max_per_page):
+        pages.append(" ".join(sentences[i : i + max_per_page]))
     return pages
 
 
@@ -156,7 +147,7 @@ def main():
     parser.add_argument("--story", type=str, help="story/fable title to extract (for collections)")
     parser.add_argument("--list-stories", action="store_true", help="list available stories and exit")
     parser.add_argument("--languages", nargs="+", default=["chinese", "french"], help="target languages")
-    parser.add_argument("--pages", type=int, default=20, help="target number of pages")
+    parser.add_argument("--max-sentences", type=int, default=2, help="max sentences per page")
     parser.add_argument("--output", type=str, default="csv-reader/decks/story.csv", help="output CSV path")
     args = parser.parse_args()
 
@@ -187,7 +178,7 @@ def main():
 
     sentences = split_into_sentences(text)
     print(f"found {len(sentences)} sentences")
-    pages = chunk_sentences(sentences, args.pages)
+    pages = chunk_sentences(sentences, args.max_sentences)
     print(f"chunked into {len(pages)} pages")
 
     pexels_key = os.environ.get("PEXELS_API_KEY", "")

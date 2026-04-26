@@ -365,12 +365,13 @@ function bestVoice(lang) {
 }
 
 function speakText(text, btn) {
+  const wasPlaying = btn.classList.contains("playing");
   speechSynthesis.cancel();
   document.querySelectorAll(".text-row-speak.playing").forEach((b) => {
     b.textContent = "▶";
     b.classList.remove("playing");
   });
-  if (btn.classList.contains("playing")) return;
+  if (wasPlaying) return;
   const utterance = new SpeechSynthesisUtterance(text);
   const lang = detectLang(text);
   if (lang) utterance.lang = lang;
