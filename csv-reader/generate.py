@@ -179,20 +179,30 @@ def main():
                 print(f"  - {title}")
         return
 
+    real_stories = {k: v for k, v in stories.items() if len(v.strip()) > 500}
+
     story_name = None
     if args.story:
         key = args.story.strip().title()
-        matches = [k for k in stories if key.lower() in k.lower()]
-        if not matches:
-            sys.exit(f"story '{args.story}' not found. use --list-stories to see available titles")
-        story_name = matches[0]
-        text = stories[story_name]
+        matches = [k for k in real_stories if key.lower() in k.lower()]
+        if matches:
+            story_name = matches[0]
+            text = real_stories[story_name]
+        else:
+            story_name = args.story.strip().title()
+            print(f"no section matched '{args.story}', using full text")
         print(f"using story: {story_name}")
-    elif stories:
-        print(f"book has {len(stories)} stories — use --story to pick one:\n")
-        for title in stories:
+    elif len(real_stories) > 3:
+        print(f"book has {len(real_stories)} stories — use --story to pick one:\n")
+        for title in real_stories:
             print(f"  - {title}")
         sys.exit(1)
+    elif real_stories:
+        story_name = next(iter(real_stories))
+        text = real_stories[story_name]
+        print(f"using story: {story_name}")
+    else:
+        print("using full text")
 
     if not args.output:
         slug = re.sub(r"[^a-z0-9]+", "-", (story_name or f"book-{args.book}").lower()).strip("-")

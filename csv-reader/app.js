@@ -361,6 +361,7 @@ loadVoices();
 
 function bestVoice(lang) {
   if (!lang) return null;
+  if (!Object.keys(voiceCache).length) loadVoices();
   return voiceCache[lang.slice(0, 2)] || null;
 }
 
