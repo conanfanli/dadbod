@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@emotion/react':
     specifier: ^11.10.6
@@ -2088,8 +2092,8 @@ packages:
       '@types/gapi.client.discovery': 1.0.9
     dev: true
 
-  /@maxim_mazurok/gapi.client.sheets-v4@0.0.20230330:
-    resolution: {integrity: sha512-FyyGiLFDLd5R2m/DFsHF9vFFrfBknTBR0GdVSL/h8v+lJdwF9C2+GMpANz0ElQZygitJlCzuVFqoCa19ufqAww==}
+  /@maxim_mazurok/gapi.client.sheets-v4@0.0.20230711:
+    resolution: {integrity: sha512-PXZ6s69F3LYuP0YEoeQxQOVDJHLFAeejA0NWsNibt3BMqHeHPUPPACCzWBnXgmB86zYsbvcqRuSTzZ277AgVCQ==}
     dependencies:
       '@types/gapi.client': 1.0.5
       '@types/gapi.client.discovery': 1.0.9
@@ -2719,7 +2723,7 @@ packages:
   /@types/gapi.client.sheets@4.0.20201031:
     resolution: {integrity: sha512-1Aiu11rNNoyPDHW6v8TVcSmlDN+MkxSuafwiawaK5YqZ+uYA+O63vjUvkK+3qNduSLh7D9qBJc/8GGwgN6gsTw==}
     dependencies:
-      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230330
+      '@maxim_mazurok/gapi.client.sheets-v4': 0.0.20230711
     dev: true
 
   /@types/gapi.client@1.0.5:
@@ -7485,7 +7489,7 @@ packages:
       levn: 0.3.0
       prelude-ls: 1.1.2
       type-check: 0.3.2
-      word-wrap: 1.2.3
+      word-wrap: 1.2.4
     dev: false
 
   /optionator@0.9.1:
@@ -7497,7 +7501,7 @@ packages:
       levn: 0.4.1
       prelude-ls: 1.2.1
       type-check: 0.4.0
-      word-wrap: 1.2.3
+      word-wrap: 1.2.4
     dev: false
 
   /p-limit@2.3.0:
@@ -10294,8 +10298,8 @@ packages:
       isexe: 2.0.0
     dev: false
 
-  /word-wrap@1.2.3:
-    resolution: {integrity: sha512-Hz/mrNwitNRh/HUAtM/VT/5VH+ygD6DV7mYKZAtHOrbs8U7lvPS6xf7EJKMF0uW1KJCl0H701g3ZGus+muE5vQ==}
+  /word-wrap@1.2.4:
+    resolution: {integrity: sha512-2V81OA4ugVo5pRo46hAoD2ivUJx8jXmWXfUkY4KFNw0hEptvN0QfH3K4nHiwzGeKl5rFKedV48QVoqYavy4YpA==}
     engines: {node: '>=0.10.0'}
     dev: false
 
